@@ -404,7 +404,7 @@ sub _wget_fetch {
         push @$cmd, '--passive-ftp' if $FTP_PASSIVE;
 
         ### set the output document, add the uri ###
-        push @$cmd, '--output-document', $to, $self->uri;
+        push @$cmd, '--output-document', qq['$to'], "'".$self->uri."'";
 
         ### shell out ###
         my $captured;
@@ -495,7 +495,7 @@ sub _lynx_fetch {
 
         push @$cmd, "-connect_timeout=$TIMEOUT" if $TIMEOUT;
 
-        push @$cmd, $self->uri;
+        push @$cmd, "'".$self->uri."'";
 
         ### shell out ###
         my $captured;
@@ -597,7 +597,8 @@ sub _curl_fetch {
 
         ### curl doesn't follow 302 (temporarily moved) etc automatically
         ### so we add --location to enable that.
-        push @$cmd, '--fail', '--location', '--output', $to, $self->uri;
+        push @$cmd, '--fail', '--location', '--output', 
+                    qq['$to'], "'".$self->uri."'";
 
         my $captured;
         unless(run( command => $cmd,
@@ -671,7 +672,7 @@ sub _rsync_fetch {
 
         push(@$cmd, '--quiet') unless $DEBUG;
 
-        push @$cmd, $self->uri, $to;
+        push @$cmd, "'".$self->uri."'", qq['$to'];
 
         my $captured;
         unless(run( command => $cmd,

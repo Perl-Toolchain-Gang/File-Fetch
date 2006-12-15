@@ -47,10 +47,10 @@ my $map = [
         file    => 'foo.txt',
     },
     {	uri	=> 'rsync://cpan.pair.com/CPAN/MIRRORING.FROM',
-	scheme	=> 'rsync',
-	host	=> 'cpan.pair.com',
-	path	=> '/CPAN/',
-	file	=> 'MIRRORING.FROM',
+        scheme	=> 'rsync',
+        host	=> 'cpan.pair.com',
+        path	=> '/CPAN/',
+        file	=> 'MIRRORING.FROM',
     },
 ];
 
@@ -109,10 +109,12 @@ for my $entry (@$map) {
 }
 
 ### http:// tests ###
-{   my $uri = 'http://www.cpan.org/index.html';
-
-    for (qw[lwp wget curl lynx]) {
-        _fetch_uri( http => $uri, $_ );
+{   for my $uri ( 'http://www.cpan.org/index.html',
+                  'http://www.cpan.org/index.html?q=1&y=2'
+    ) {
+        for (qw[lwp wget curl lynx]) {
+            _fetch_uri( http => $uri, $_ );
+        }
     }
 }
 
