@@ -1,3 +1,10 @@
+Changes for 0.09_01 Wed Jan  3 17:17:31 CET 2007
+================================================
+* address: #23864: File:Fetch does not use quotation 
+    marks while using wget:
+  * the handlers for lynx, wget, curl and rsync now
+    quote their URIs.
+
 Changes for 0.08    Wed Jul  5 13:56:36 CEST 2006
 ================================================
 * address: #18942: unproper handling of http errors 
