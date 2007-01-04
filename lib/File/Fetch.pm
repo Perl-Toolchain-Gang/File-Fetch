@@ -706,31 +706,25 @@ Pass it a true value to get the C<Carp::longmess()> output instead.
 
 =cut
 
-### Error handling, the way Archive::Tar does it ###
-{
-    my $error       = '';
-    my $longmess    = '';
-
-    sub _error {
-        my $self    = shift;
-        $error      = shift;
-        $longmess   = Carp::longmess($error);
-
-        ### set Archive::Tar::WARN to 0 to disable printing
-        ### of errors
-        if( $WARN ) {
-            carp $DEBUG ? $longmess : $error;
-        }
-
-        return;
+### error handling the way Archive::Extract does it
+sub _error {
+    my $self    = shift;
+    my $error   = shift;
+    
+    $self->_error_msg( $error );
+    $self->_error_msg_long( Carp::longmess($error) );
+    
+    if( $WARN ) {
+        carp $DEBUG ? $self->_error_msg_long : $self->_error_msg;
     }
 
-    sub error {
-        my $self = shift;
-        return shift() ? $longmess : $error;
-    }
+    return;
 }
 
+sub error {
+    my $self = shift;
+    return shift() ? $self->_error_msg_long : $self->_error_msg;
+}
 
 
 1;
