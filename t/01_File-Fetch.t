@@ -9,6 +9,12 @@ use Cwd             qw[cwd];
 use File::Basename  qw[basename];
 use Data::Dumper;
 
+use_ok('File::Fetch');
+
+### optionally set debugging ###
+$File::Fetch::DEBUG = $File::Fetch::DEBUG   = 1 if $ARGV[0];
+$IPC::Cmd::DEBUG    = $IPC::Cmd::DEBUG      = 1 if $ARGV[0];
+
 unless( $ENV{PERL_CORE} ) {
     warn qq[
 
@@ -23,13 +29,18 @@ to no fault of the module itself.
 
 ];
 
-    sleep 3;
+    sleep 3 unless $File::Fetch::DEBUG;
 }
 
-use_ok('File::Fetch');
-
-### optionally set debugging ###
-$File::Fetch::DEBUG = $File::Fetch::DEBUG = 1 if $ARGV[0];
+### show us the tools IPC::Cmd will use to run binary programs
+if( $File::Fetch::DEBUG ) {
+    diag( "IPC::Run enabled: $IPC::Cmd::USE_IPC_RUN " );
+    diag( "IPC::Run available: " . IPC::Cmd->can_use_ipc_run );
+    diag( "IPC::Run vesion: $IPC::Run::VERSION" );
+    diag( "IPC::Open3 enabled: $IPC::Cmd::USE_IPC_OPEN3 " );
+    diag( "IPC::Open3 available: " . IPC::Cmd->can_use_ipc_open3 );
+    diag( "IPC::Open3 vesion: $IPC::Open3::VERSION" );
+}
 
 ### _parse_uri tests
 my $map = [
@@ -139,7 +150,7 @@ sub _fetch_uri {
         my $file = $ff->fetch( to => 'tmp' );
     
         SKIP: {
-            skip "You do not have '$method' installed", 3
+            skip "You do not have '$method' installed/available", 3
                 if $File::Fetch::METHOD_FAIL->{$method} &&
                    $File::Fetch::METHOD_FAIL->{$method};
     

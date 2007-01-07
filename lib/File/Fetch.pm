@@ -348,6 +348,14 @@ sub fetch {
         ### method is known to fail ###
         next if $METHOD_FAIL->{$method};
 
+        ### there's serious issues with IPC::Run and quoting of command
+        ### line arguments. using quotes in the wrong place breaks things,
+        ### and in the case of say, 
+        ### C:\cygwin\bin\wget.EXE --quiet --passive-ftp --output-document
+        ### "index.html" "http://www.cpan.org/index.html?q=1&y=2"
+        ### it doesn't matter how you quote, it always fails.
+        local $IPC::Cmd::USE_IPC_RUN = 0;
+        
         if( my $file = $self->$sub( 
                         to => File::Spec->catfile( $to, $self->output_file )
         )){
@@ -515,11 +523,18 @@ sub _wget_fetch {
         push @$cmd, '--passive-ftp' if $FTP_PASSIVE;
 
         ### set the output document, add the uri ###
-        push @$cmd, '--output-document', qq['$to'], QUOTE. $self->uri .QUOTE;
+        push @$cmd, '--output-document', 
+                    ### DO NOT quote things for IPC::Run, it breaks stuff.
+                    $IPC::Cmd::USE_IPC_RUN
+                        ? ($to, $self->uri)
+                        : (QUOTE. $to .QUOTE, QUOTE. $self->uri .QUOTE);
 
         ### shell out ###
         my $captured;
-        unless( run( command => $cmd, buffer => \$captured, verbose => 0 ) ) {
+        unless(run( command => $cmd, 
+                    buffer  => \$captured, 
+                    verbose => $DEBUG  
+        )) {
             ### wget creates the output document always, even if the fetch
             ### fails.. so unlink it in that case
             1 while unlink $to;
@@ -547,7 +562,7 @@ sub _ftp_fetch {
     };
     check( $tmpl, \%hash ) or return;
 
-    ### see if we have a wget binary ###
+    ### see if we have a ftp binary ###
     if( my $ftp = can_run('ftp') ) {
 
         my $fh = FileHandle->new;
@@ -565,7 +580,7 @@ sub _ftp_fetch {
             "cd /",
             "cd " . $self->path,
             "binary",
-            "get " . $self->file . " " . $self->file,
+            "get " . $self->file . " " . $self->output_file,
             "quit",
         );
 
@@ -588,9 +603,16 @@ sub _lynx_fetch {
     };
     check( $tmpl, \%hash ) or return;
 
-    ### see if we have a wget binary ###
+    ### see if we have a lynx binary ###
     if( my $lynx = can_run('lynx') ) {
 
+        unless( IPC::Cmd->can_capture_buffer ) {
+            $METHOD_FAIL->{'lynx'} = 1;
+
+            return $self->_error(loc( 
+                "Can not capture buffers. Can not use '%1' to fetch files",
+                'lynx' ));
+        }            
 
         ### write to the output file ourselves, since lynx ass_u_mes to much
         my $local = FileHandle->new(">$to")
@@ -606,7 +628,11 @@ sub _lynx_fetch {
 
         push @$cmd, "-connect_timeout=$TIMEOUT" if $TIMEOUT;
 
-        push @$cmd, QUOTE. $self->uri .QUOTE;
+        ### DO NOT quote things for IPC::Run, it breaks stuff.
+        push @$cmd, $IPC::Cmd::USE_IPC_RUN
+                        ? $self->uri
+                        : QUOTE. $self->uri .QUOTE;
+
 
         ### shell out ###
         my $captured;
@@ -651,7 +677,7 @@ sub _ncftp_fetch {
     ### if $FTP_PASSIVE is set
     return if $FTP_PASSIVE;
 
-    ### see if we have a wget binary ###
+    ### see if we have a ncftp binary ###
     if( my $ncftp = can_run('ncftp') ) {
 
         my $cmd = [
@@ -661,7 +687,12 @@ sub _ncftp_fetch {
             $self->host,            # hostname
             dirname($to),           # local dir for the file
                                     # remote path to the file
-            QUOTE. File::Spec::Unix->catdir( $self->path, $self->file ) .QUOTE,
+            ### DO NOT quote things for IPC::Run, it breaks stuff.
+            $IPC::Cmd::USE_IPC_RUN
+                        ? File::Spec::Unix->catdir( $self->path, $self->file )
+                        : QUOTE. File::Spec::Unix->catdir( 
+                                        $self->path, $self->file ) .QUOTE
+            
         ];
 
         ### shell out ###
@@ -709,7 +740,10 @@ sub _curl_fetch {
         ### curl doesn't follow 302 (temporarily moved) etc automatically
         ### so we add --location to enable that.
         push @$cmd, '--fail', '--location', '--output', 
-                    QUOTE. $to .QUOTE, QUOTE. $self->uri .QUOTE;
+                    ### DO NOT quote things for IPC::Run, it breaks stuff.
+                    $IPC::Cmd::USE_IPC_RUN
+                        ? ($to, $self->uri)
+                        : (QUOTE. $to .QUOTE, QUOTE. $self->uri .QUOTE);
 
         my $captured;
         unless(run( command => $cmd,
@@ -783,7 +817,10 @@ sub _rsync_fetch {
 
         push(@$cmd, '--quiet') unless $DEBUG;
 
-        push @$cmd, QUOTE. $self->uri .QUOTE, QUOTE. $to .QUOTE;
+        ### DO NOT quote things for IPC::Run, it breaks stuff.
+        push @$cmd, $IPC::Cmd::USE_IPC_RUN
+                        ? ($self->uri, $to)
+                        : (QUOTE. $self->uri .QUOTE, QUOTE. $to .QUOTE);
 
         my $captured;
         unless(run( command => $cmd,
