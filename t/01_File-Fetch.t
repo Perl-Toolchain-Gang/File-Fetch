@@ -27,7 +27,6 @@ to no fault of the module itself.
 }
 
 use_ok('File::Fetch');
-use_ok('File::Fetch::Item');
 
 ### optionally set debugging ###
 $File::Fetch::DEBUG = $File::Fetch::DEBUG = 1 if $ARGV[0];
@@ -67,21 +66,15 @@ for my $entry (@$map ) {
     }
 }
 
-### File::Fetch::Item tests ###
-for my $entry (@$map) {
-    my $ffi = File::Fetch::Item->new( %$entry );
-    isa_ok( $ffi, 'File::Fetch::Item' );
-
-    for my $acc ( keys %$entry ) {
-        is( $ffi->$acc(), $entry->{$acc},
-                    "   Accessor '$acc' ok" );
-    }
-}
-
 ### File::Fetch->new tests ###
 for my $entry (@$map) {
     my $ff = File::Fetch->new( uri => $entry->{uri} );
-    isa_ok( $ff, "File::Fetch::Item" );
+    isa_ok( $ff, "File::Fetch" );
+
+    for my $acc ( keys %$entry ) {
+        is( $ff->$acc(), $entry->{$acc},
+                    "   Accessor '$acc' ok" );
+    }
 }
 
 ### fetch() tests ###
@@ -132,7 +125,7 @@ sub _fetch_uri {
     my $method  = shift or return;
 
     SKIP: {
-        skip "'$method' fetching tests disabled under perl core", 3
+        skip "'$method' fetching tests disabled under perl core", 4
                 if $ENV{PERL_CORE};
     
         ### stupid warnings ###
@@ -146,12 +139,14 @@ sub _fetch_uri {
         my $file = $ff->fetch( to => 'tmp' );
     
         SKIP: {
-            skip "You do not have '$method' installed", 2
+            skip "You do not have '$method' installed", 3
                 if $File::Fetch::METHOD_FAIL->{$method} &&
                    $File::Fetch::METHOD_FAIL->{$method};
     
             ok( $file,      "   File ($file) fetched using $method" );
-            ok( -s $file,   "   File ($file) has size" );
+            ok( -s $file,   "   File has size" );
+            is( basename($file), $ff->output_file,
+                            "   File has expected name" );
     
             unlink $file;
         }
