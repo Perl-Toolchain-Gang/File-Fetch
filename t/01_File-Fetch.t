@@ -34,10 +34,13 @@ to no fault of the module itself.
 
 ### show us the tools IPC::Cmd will use to run binary programs
 if( $File::Fetch::DEBUG ) {
-    diag( "IPC::Run enabled: $IPC::Cmd::USE_IPC_RUN " );
+    ### stupid 'used only once' warnings ;(
+    diag( "IPC::Run enabled: " . 
+            $IPC::Cmd::USE_IPC_RUN || $IPC::Cmd::USE_IPC_RUN );
     diag( "IPC::Run available: " . IPC::Cmd->can_use_ipc_run );
     diag( "IPC::Run vesion: $IPC::Run::VERSION" );
-    diag( "IPC::Open3 enabled: $IPC::Cmd::USE_IPC_OPEN3 " );
+    diag( "IPC::Open3 enabled: " . 
+            $IPC::Cmd::USE_IPC_OPEN3 || $IPC::Cmd::USE_IPC_OPEN3 );
     diag( "IPC::Open3 available: " . IPC::Cmd->can_use_ipc_open3 );
     diag( "IPC::Open3 vesion: $IPC::Open3::VERSION" );
 }

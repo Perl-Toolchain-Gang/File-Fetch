@@ -1,3 +1,19 @@
+Changes for 0.09_02 Sun Jan  7 18:44:09 CET 2007
+================================================
+* The quotation as done in 0.09_01 doesn't play
+  nicely with Win32 and IPC::Run. IPC::Run is
+  therefor disabled during the fetch() call.
+* Remove File::Fetch::Item as a class. All objects
+  are now plain File::Fetch objects. This has no
+  impact on user-end code, except code that checks
+  the class of objects.
+* URI encoding is not always clear or trivial. Add
+  a FAQ entry about it.
+* Add $ff->output_file as accessor, which is the 
+  requested file, stripped from query parameters.
+* Errors are now stored per object rather than 
+  class wide.
+
 Changes for 0.09_01 Wed Jan  3 17:17:31 CET 2007
 ================================================
 * address: #23864: File:Fetch does not use quotation 
