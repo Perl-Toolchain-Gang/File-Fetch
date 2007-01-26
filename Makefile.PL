@@ -16,6 +16,7 @@ WriteMakefile (
                         'Module::Load::Conditional' => 0.04,
                         'Locale::Maketext::Simple'  => 0,
                     },
+    INSTALLDIRS     => ( $] >= 5.009005 ? 'perl' : 'site' ),
     AUTHOR          => 'Jos Boumans <kane[at]cpan.org>',
 	ABSTRACT        => 'Generic file fetching code'
 );     
