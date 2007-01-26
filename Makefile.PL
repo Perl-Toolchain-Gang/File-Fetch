@@ -6,7 +6,7 @@ WriteMakefile (
     VERSION_FROM    => 'lib/File/Fetch.pm', # finds $VERSION
     dist            => { COMPRESS => 'gzip -9f', SUFFIX => 'gz' },
     PREREQ_PM       => { 
-                        'IPC::Cmd'                  => 0.04,
+                        'IPC::Cmd'                  => 0.36,
                         'Test::More'                => 0, 
                         'File::Copy'                => 0,
                         'File::Spec'                => 0.82,
