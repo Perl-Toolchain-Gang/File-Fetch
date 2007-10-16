@@ -1,3 +1,7 @@
+Changes for 0.12    Mon Oct 15 14:32:23 CEST 2007
+=================================================
+* Treat VMS like UNIX when dealing with file URIs
+
 Changes for 0.10    Fri Jan 26 13:51:19 CET 2007
 ================================================
 * Promote 0.09_02 to stable.
