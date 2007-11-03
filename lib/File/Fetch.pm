@@ -304,50 +304,33 @@ sub _parse_uri {
         
         my @parts = split '/',$uri;
 
-        if (ON_WIN) {
-            ### if the first element is empty it could be because there
-            ### is an empty hostname element. OR it could be because
-            ### it is a windows network share url.
-            ### The only way to tell is look at the next element
-            ### and see if it is a volume designator, if it is not a volume
-            ### designator then the host name is actually the next element
-            ### and the sharename follows that:
+        ### file://hostname/...
+        ### file://hostname/...
+        $href->{host} = $parts[0] || '';
 
-            my $first_elem = shift @parts;
-            if ($parts[0] =~ s/\A([A-Z])\|\z/$1:/i ||   # s/D|/D:/
-                $parts[0] =~ m/\A[A-Z]:\z/i             # m/D:/
-            ) {
-
-                ### file:///D|/blah.txt
-                ### file:///D:/blah.txt
-                ### file://hostname/D|/blah.txt
-                ### file://hostname/D:/blah.txt
-                $href->{host} = $first_elem;
-                $href->{vol}  = shift @parts;
-
-            } else {
-
-                ### file:////hostname/sharename/blah.txt
-                ### Ignore $first_elem in this case
-                $href->{host}  = shift @parts || '';  # avoid warnings
-                $href->{share} = shift @parts || '';  # avoid warnings
-            }
-
-            ### now @parts contains the path and filename ONLY, the other bits
-            ### have been extracted out.
-
-        ### VMS needs volume designators
-        } elsif (ON_VMS) {
-            $href->{host} = shift @parts || '';
-            $href->{vol}  = shift @parts || '';
-
-        ### standard unix;
-        } else {
-            $href->{host} = shift @parts || '';
-        }
+        ### index in @parts where the path components begin;
+        my $index = 1;  
         
+        ### file:///D|/blah.txt
+        ### file:///D:/blah.txt
+        ### file://hostname/D|/blah.txt
+        ### file://hostname/D:/blah.txt
+        if ($parts[1] =~ s/\A([A-Z])\|\z/$1:/i ||   # s/D|/D:/
+            $parts[1] =~ m/\A[A-Z]:\z/i             # m/D:/
+        ) {
+            $href->{vol}    = $parts[1];        
+            $index          = 2;        # index after the volume
+
+        ### file:////hostname/sharename/blah.txt        
+        } elsif ( not length $parts[0] and not length $parts[1] ) {
+            $href->{host}   = $parts[2] || '';  # avoid warnings
+            $href->{share}  = $parts[3] || '';  # avoid warnings        
+
+            $index          = 4         # index after the share
+        }
+
         ### rebuild the path from the leftover paths;
-        $href->{path} = join '/', "", @parts;
+        $href->{path} = join '/', '', splice( @parts, $index, scalar(@parts) );
 
     } else {
         ### using anything but qw() in hash slices may produce warnings 
