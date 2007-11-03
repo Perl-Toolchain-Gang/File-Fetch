@@ -330,7 +330,7 @@ sub _parse_uri {
         }
 
         ### rebuild the path from the leftover paths;
-        $href->{path} = join '/', '', splice( @parts, $index, scalar(@parts) );
+        $href->{path} = join '/', '', splice( @parts, $index, $#parts );
 
     } else {
         ### using anything but qw() in hash slices may produce warnings 
