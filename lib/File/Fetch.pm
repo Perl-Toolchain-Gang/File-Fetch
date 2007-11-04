@@ -23,7 +23,7 @@ use vars    qw[ $VERBOSE $PREFER_BIN $FROM_EMAIL $USER_AGENT
 use constant QUOTE  => do { $^O eq 'MSWin32' ? q["] : q['] };            
             
 
-$VERSION        = '0.13_01';
+$VERSION        = '0.13_02';
 $PREFER_BIN     = 0;        # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';
 $USER_AGENT     = 'File::Fetch/$VERSION';
@@ -159,7 +159,7 @@ result of $ff->output_file will be used.
         }
         
         for (qw[path file]) {
-            unless( $args->$_ ) {
+            unless( $args->$_() ) { # 5.5.x needs the ()
                 return File::Fetch->_error(loc("No '%1' specified",$_));
             }
         }
