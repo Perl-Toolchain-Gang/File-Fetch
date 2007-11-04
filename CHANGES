@@ -1,3 +1,9 @@
+Changes for 0.13_01 Sat Nov  3 18:55:10 CET 2007
+=================================================
+* Apply a modified version of dmq's patch to deal
+  properly with file:// URIs on Win32. 
+* Add test cases for Win32 file:// URIs
+
 Changes for 0.12    Mon Oct 15 14:32:23 CEST 2007
 =================================================
 * Treat VMS like UNIX when dealing with file URIs
