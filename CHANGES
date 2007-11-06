@@ -1,3 +1,12 @@
+Changes for 0.13_03 2007-11-04 21:32:40
+=================================================
+* Restore OS specific file:// URI behaviour. The 
+  RFC's specify that the url definition is host OS
+  specific, so what a url means on one machine will
+  mean something different on another.
+  VMS is now treated according to RFC 1738 
+  (http://www.faqs.org/rfcs/rfc1738.html).
+
 Changes for 0.13_02 Sun Nov  4 10:38:40 CET 2007
 =================================================
 * Apply a perl 5.5.x compatibility fix. Users with
