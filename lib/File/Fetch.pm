@@ -24,8 +24,8 @@ use constant QUOTE  => do { $^O eq 'MSWin32' ? q["] : q['] };
             
 
 $VERSION        = '0.13_03';
-$VERSION        = eval $VERSION; # avoid warnings with development releases
-$PREFER_BIN     = 0;        # XXX TODO implement
+$VERSION        = eval $VERSION;    # avoid warnings with development releases
+$PREFER_BIN     = 0;                # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';
 $USER_AGENT     = 'File::Fetch/$VERSION';
 $BLACKLIST      = [qw|ftp|];
