@@ -87,7 +87,7 @@ push @map, (
         path    => '/tmp/',
         file    => 'foo.txt',
     },    
-) if not &File::Fetch::ON_WIN or not &File::Fetch::ON_VMS;
+) if not &File::Fetch::ON_WIN and not &File::Fetch::ON_VMS;
 
 ### these only on win32
 push @map, (
@@ -113,6 +113,7 @@ push @map, (
         file    => 'foo.txt',
     },    
 ) if &File::Fetch::ON_WIN;
+
 
 ### parse uri tests ###
 for my $entry (@map ) {
