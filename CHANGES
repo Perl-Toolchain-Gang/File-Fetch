@@ -1,4 +1,8 @@
-Changes for 0.13_03 2007-11-04 21:32:40
+Changes for 0.13_04     Wed Nov 14 20:07:02 2007
+=================================================
+* VMS patches for file:// uris by John M.
+
+Changes for 0.13_03         2007-11-04 21:32:40
 =================================================
 * Restore OS specific file:// URI behaviour. The 
   RFC's specify that the url definition is host OS
