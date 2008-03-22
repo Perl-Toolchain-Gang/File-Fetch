@@ -206,6 +206,11 @@ sub _fetch_uri {
             skip "You do not have '$method' installed/available", 3
                 if $File::Fetch::METHOD_FAIL->{$method} &&
                    $File::Fetch::METHOD_FAIL->{$method};
+                
+            ### if the file wasn't fetched, it may be a network/firewall issue                
+            skip "Fetch failed; no network connectivity for '$type'?", 3 
+                unless $file;
+                
             ok( $file,          "   File ($file) fetched with $method ($uri)" );
             ok( $file && -s $file,   
                                 "   File has size" );
