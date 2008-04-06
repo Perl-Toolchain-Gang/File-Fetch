@@ -22,7 +22,7 @@ unless( $ENV{PERL_CORE} ) {
 
 Some of these tests assume you are connected to the
 internet. If you are not, or if certain protocols or hosts
-are blocked and/or firewalled, these tests will fail due
+are blocked and/or firewalled, these tests could fail due
 to no fault of the module itself.
 
 ###########################################################
