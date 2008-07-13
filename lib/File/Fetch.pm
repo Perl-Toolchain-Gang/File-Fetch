@@ -864,7 +864,7 @@ sub _curl_fetch {
     if (my $curl = can_run('curl')) {
 
         ### these long opts are self explanatory - I like that -jmb
-	    my $cmd = [ $curl ];
+	    my $cmd = [ $curl, '-q' ];
 
 	    push(@$cmd, '--connect-timeout', $TIMEOUT) if $TIMEOUT;
 
