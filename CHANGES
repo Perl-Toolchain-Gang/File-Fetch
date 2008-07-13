@@ -1,3 +1,15 @@
+Changes for 0.15_03     Sun Jul 13 15:56:41 2008
+=================================================
+* Add -q to curl, to inhibit the reading of .curlrc, 
+  which may interfere with the options we pass ourselves. 
+  This addresses #36902
+
+Changes for 0.15_02     Sun May 18 13:42:30 2008
+=================================================
+* Address #35018: Treat HTTP 404 Message as fail with lynx
+  lynx now does a -head request first to make sure the file
+  exists before proceeding
+
 Changes for 0.15_01     Sun Apr  6 13:55:36 2008
 =================================================
 * Address: #32755: File-Fetch tests cannot fail if 
