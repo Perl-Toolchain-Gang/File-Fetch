@@ -1148,9 +1148,9 @@ external programs and modules.
 Below is a mapping of what utilities will be used in what order
 for what schemes, if available:
 
-    file    => LWP, file
-    http    => LWP, wget, curl, lynx
-    ftp     => LWP, Net::FTP, wget, curl, ncftp, ftp
+    file    => LWP, lftp, file
+    http    => LWP, wget, curl, lftp, lynx
+    ftp     => LWP, Net::FTP, wget, curl, lftp, ncftp, ftp
     rsync   => rsync
 
 If you'd like to disable the use of one or more of these utilities
@@ -1266,6 +1266,7 @@ the $BLACKLIST, $METHOD_FAIL and other internal functions.
     ftp         => ftp
     curl        => curl
     rsync       => rsync
+    lftp        => lftp
 
 =head1 FREQUENTLY ASKED QUESTIONS
 
