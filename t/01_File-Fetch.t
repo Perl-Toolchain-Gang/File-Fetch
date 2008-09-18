@@ -148,14 +148,14 @@ for my $entry (@map) {
     my $prefix = &File::Fetch::ON_UNIX ? 'file://' : 'file:///';
     my $uri = $prefix . cwd() .'/'. basename($0);
 
-    for (qw[lwp file]) {
+    for (qw[lwp lftp file]) {
         _fetch_uri( file => $uri, $_ );
     }
 }
 
 ### ftp:// tests ###
 {   my $uri = 'ftp://ftp.funet.fi/pub/CPAN/index.html';
-    for (qw[lwp netftp wget curl ncftp]) {
+    for (qw[lwp netftp wget curl lftp ncftp]) {
 
         ### STUPID STUPID warnings ###
         next if $_ eq 'ncftp' and $File::Fetch::FTP_PASSIVE
@@ -167,9 +167,10 @@ for my $entry (@map) {
 
 ### http:// tests ###
 {   for my $uri ( 'http://www.cpan.org/index.html',
-                  'http://www.cpan.org/index.html?q=1&y=2'
+                  'http://www.cpan.org/index.html?q=1',
+                  'http://www.cpan.org/index.html?q=1&y=2',
     ) {
-        for (qw[lwp wget curl lynx]) {
+        for (qw[lwp wget curl lftp lynx]) {
             _fetch_uri( http => $uri, $_ );
         }
     }
