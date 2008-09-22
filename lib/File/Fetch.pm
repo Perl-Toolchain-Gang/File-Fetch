@@ -2,6 +2,7 @@ package File::Fetch;
 
 use strict;
 use FileHandle;
+use File::Temp;
 use File::Copy;
 use File::Spec;
 use File::Spec::Unix;
@@ -667,39 +668,39 @@ sub _lftp_fetch {
     };
     check( $tmpl, \%hash ) or return;
 
-    ### a & in the uri will make the program background
-    ### that does not really work for us, so skip these
-    ### types of uris
-    if( $self->uri =~ /&/ ) {
-        $self->_error(loc("URI '%1' contains a '%2' which makes %3 background itself. ".
-                          "Can not fetch with %4", $self->uri, '&', 'lftp', 'lftp'));
-        return;
-    }      
-
     ### see if we have a wget binary ###
     if( my $lftp = can_run('lftp') ) {
 
         ### no verboseness, thanks ###
-        my $cmd = [ $lftp, '-q', '-c' ];
+        my $cmd = [ $lftp, '-f' ];
 
-        my $str = QUOTE;
-
+        my $fh = File::Temp->new;
+        
+        my $str;
+        
         ### if a timeout is set, add it ###
-        $str .= "set net:timeout $TIMEOUT; " if $TIMEOUT;
+        $str .= "set net:timeout $TIMEOUT;\n" if $TIMEOUT;
 
         ### run passive if specified ###
-        $str .= 'set ftp:passive-mode 1; ' if $FTP_PASSIVE;
+        $str .= "set ftp:passive-mode 1;\n" if $FTP_PASSIVE;
 
         ### set the output document, add the uri ###
         ### quote the URI, because lftp supports certain shell
         ### expansions, most notably & for backgrounding.
         ### ' quote does nto work, must be "
-        $str .= 'get '. $self->uri .' -o '. $to;
+        $str .= q[get ']. $self->uri .q[' -o ]. $to . $/;
 
-        $str .= QUOTE;
+        if( $DEBUG ) {
+            my $pp_str = join ' ', split $/, $str;
+            print "# lftp command: $pp_str\n";
+        }              
+
+        ### write straight to the file.
+        $fh->autoflush(1);
+        print $fh $str;
 
         ### the command needs to be 1 string to be executed
-        push @$cmd, $str;
+        push @$cmd, $fh->filename;
 
         ### with IPC::Cmd > 0.41, this is fixed in teh library,
         ### and there's no need for special casing any more.
@@ -707,6 +708,7 @@ sub _lftp_fetch {
         # $IPC::Cmd::USE_IPC_RUN
         #    ? ($to, $self->uri)
         #    : (QUOTE. $to .QUOTE, QUOTE. $self->uri .QUOTE);
+
 
         ### shell out ###
         my $captured;
