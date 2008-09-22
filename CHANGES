@@ -1,3 +1,11 @@
+Changes for 0.15_04     Mon Sep 22 15:08:49 2008
+=================================================
+* Address: #37649: Feature request: Support lftp
+  File::Fetch now supports lftp, with one minor caveat: it uses
+  a temporary file to store the commands for lftp, as they are
+  multiline commands. Without this, we run into portability issues
+  with 'special' characters on various platforms, like ; and &.
+  
 Changes for 0.15_03     Sun Jul 13 15:56:41 2008
 =================================================
 * Add -q to curl, to inhibit the reading of .curlrc, 
