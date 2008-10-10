@@ -24,7 +24,7 @@ use vars    qw[ $VERBOSE $PREFER_BIN $FROM_EMAIL $USER_AGENT
 use constant QUOTE  => do { $^O eq 'MSWin32' ? q["] : q['] };            
             
 
-$VERSION        = '0.15_04';
+$VERSION        = '0.16';
 $VERSION        = eval $VERSION;    # avoid warnings with development releases
 $PREFER_BIN     = 0;                # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';
@@ -657,7 +657,7 @@ sub _wget_fetch {
     }
 }
 
-### /bin/wget fetch ###
+### /bin/lftp fetch ###
 sub _lftp_fetch {
     my $self = shift;
     my %hash = @_;
