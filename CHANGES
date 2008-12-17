@@ -1,3 +1,10 @@
+Changes for 0.18        Wed Dec 17 14:00:40 2008
+=================================================
+* Address #41412: User agent string contains uninterpolated 
+  $VERSION.
+* Use IPC::Cmd 0.42's supplied QUOTE constant, rather than 
+  rolling our own
+
 Changes for 0.16        Fri Oct 10 13:54:40 2008
 =================================================
 * Promote 0.15_04 to stable.
