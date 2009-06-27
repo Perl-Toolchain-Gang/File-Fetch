@@ -1,3 +1,7 @@
+Changes for 0.20        Sat Jun 27 16:30:59 2009
+=================================================
+* Promote 0.19_01 to stable
+
 Changes for 0.19_01     Mon Feb  9 18:04:01 2009
 =================================================
 * Address: #42268: Wishlist: slurp to scalar
