@@ -1,3 +1,8 @@
+Changes for 0.21_01     Wed Nov 11 23:38:27 2009
+=================================================
+* Added a simple IO::Socket/IO::Select based http retriever,
+  based on code suggested by Paul 'Leonerd' Evans
+
 Changes for 0.20        Sat Jun 27 16:30:59 2009
 =================================================
 * Promote 0.19_01 to stable
