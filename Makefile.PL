@@ -18,5 +18,6 @@ WriteMakefile (
                     },
     INSTALLDIRS     => ( $] >= 5.009005 ? 'perl' : 'site' ),
     AUTHOR          => 'Jos Boumans <kane[at]cpan.org>',
-	ABSTRACT        => 'Generic file fetching code'
+	ABSTRACT        => 'Generic file fetching code',
+    clean         => {FILES => 't/tmp'},
 );     

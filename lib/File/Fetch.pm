@@ -619,9 +619,9 @@ sub _iosock_fetch {
                  "Could not open '%1' for writing: %2",$to,$!));
         }
 
-        my $path = File::Spec::UNIX->catfile( $self->path, $self->file );
-
-        $sock->send( "GET $path HTTP/1.0\x0d\x0aHost: $self->host\x0d\x0a\x0d\x0a" );
+        my $path = File::Spec::Unix->catfile( $self->path, $self->file );
+        my $req = "GET $path HTTP/1.0\x0d\x0aHost: " . $self->host . "\x0d\x0a\x0d\x0a";
+        $sock->send( $req );
 
         my $select = IO::Select->new( $sock );
 
