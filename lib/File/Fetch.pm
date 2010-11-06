@@ -1351,7 +1351,7 @@ Below is a mapping of what utilities will be used in what order
 for what schemes, if available:
 
     file    => LWP, lftp, file
-    http    => LWP, HTTP::Lite wget, curl, lftp, lynx, iosock
+    http    => LWP, HTTP::Lite, wget, curl, lftp, lynx, iosock
     ftp     => LWP, Net::FTP, wget, curl, lftp, ncftp, ftp
     rsync   => rsync
 
