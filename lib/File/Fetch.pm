@@ -622,9 +622,11 @@ sub _httplite_fetch {
                  "Could not open '%1' for writing: %2",$to,$!));
           }
 
+          $fh->autoflush(1);
+
           binmode $fh;
 
-          my $rc = $http->request( $uri, sub { my ($self,$dref,$cbargs) = @_; print {$cbargs} $$dref }, $fh );
+          my $rc = $http->request( $uri, sub { my ($self,$dref,$cbargs) = @_; local $\; print {$cbargs} $$dref }, $fh );
 
           close $fh;
 
@@ -696,6 +698,7 @@ sub _iosock_fetch {
                  "Could not open '%1' for writing: %2",$to,$!));
         }
 
+        $fh->autoflush(1);
         binmode $fh;
 
         my $path = File::Spec::Unix->catfile( $self->path, $self->file );
@@ -733,7 +736,10 @@ sub _iosock_fetch {
             return $self->_error(loc("Got a '%1' from '%2' expected '200'",$code,$self->host));
         }
 
-        print $fh +($resp =~ m/\x0d\x0a\x0d\x0a(.*)$/s )[0];
+        {
+          local $\;
+          print $fh +($resp =~ m/\x0d\x0a\x0d\x0a(.*)$/s )[0];
+        }
         close $fh;
         return $to;
 
