@@ -1,3 +1,8 @@
+Changes for 0.26        Sat Nov  6 23:30:59 2010
+=================================================
+* Added support for HTTP::Lite 
+* Resolved issue with '-l' switch and iosock fetch
+
 Changes for 0.24        Wed Jan  6 23:32:19 2010
 =================================================
 * Applied a patch from brian d foy RT #53427
