@@ -1,3 +1,8 @@
+Changes for 0.28        Sun Nov  7 21:22:26 2010
+=================================================
+* Added support for FreeBSDs 'fetch' command for
+  both http and ftp schemes.
+
 Changes for 0.26        Sat Nov  6 23:30:59 2010
 =================================================
 * Added support for HTTP::Lite 
