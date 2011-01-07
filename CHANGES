@@ -1,3 +1,7 @@
+Changes for 0.30        Fri Jan  7 21:00:27 2011
+=================================================
+* Apply blead patches from Peter Acklam
+
 Changes for 0.28        Sun Nov  7 21:22:26 2010
 =================================================
 * Added support for FreeBSDs 'fetch' command for
