@@ -1,3 +1,7 @@
+Changes for 0.32        Mon Jan 17 10:26:40 2011
+=================================================
+* Added support for HTTP::Tiny
+
 Changes for 0.30        Fri Jan  7 21:00:27 2011
 =================================================
 * Apply blead patches from Peter Acklam
