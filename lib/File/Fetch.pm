@@ -641,8 +641,6 @@ sub _httplite_fetch {
 
     };
 
-    # https://github.com/dagolden/cpanpm/compare/master...private%2Fuse-http-lite
-
     if( can_load(modules => $use_list) ) {
 
         my $uri = $self->uri;
