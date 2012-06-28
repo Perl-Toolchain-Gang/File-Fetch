@@ -1,3 +1,8 @@
+Changes for 0.36        Thu Jun 28 13:41:31 2012
+=================================================
+* Added 'file_default' option for URLs that do
+  not have a file component (Andrew Kirkpatrick)
+
 Changes for 0.34        Thu Apr 12 22:25:01 2012
 =================================================
 * Added heuristics to skip tests when no
