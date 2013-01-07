@@ -565,34 +565,34 @@ sub _lwp_fetch {
         return;
     }
 
-        ### setup the uri object
-        my $uri = URI->new( File::Spec::Unix->catfile(
-                                    $self->path, $self->file
-                        ) );
+    ### setup the uri object
+    my $uri = URI->new( File::Spec::Unix->catfile(
+                                $self->path, $self->file
+                    ) );
 
-        ### special rules apply for file:// uris ###
-        $uri->scheme( $self->scheme );
-        $uri->host( $self->scheme eq 'file' ? '' : $self->host );
-        $uri->userinfo("anonymous:$FROM_EMAIL") if $self->scheme ne 'file';
+    ### special rules apply for file:// uris ###
+    $uri->scheme( $self->scheme );
+    $uri->host( $self->scheme eq 'file' ? '' : $self->host );
+    $uri->userinfo("anonymous:$FROM_EMAIL") if $self->scheme ne 'file';
 
-        ### set up the useragent object
-        my $ua = LWP::UserAgent->new();
-        $ua->timeout( $TIMEOUT ) if $TIMEOUT;
-        $ua->agent( $USER_AGENT );
-        $ua->from( $FROM_EMAIL );
-        $ua->env_proxy;
+    ### set up the useragent object
+    my $ua = LWP::UserAgent->new();
+    $ua->timeout( $TIMEOUT ) if $TIMEOUT;
+    $ua->agent( $USER_AGENT );
+    $ua->from( $FROM_EMAIL );
+    $ua->env_proxy;
 
-        my $res = $ua->mirror($uri, $to) or return;
+    my $res = $ua->mirror($uri, $to) or return;
 
-        ### uptodate or fetched ok ###
-        if ( $res->code == 304 or $res->code == 200 ) {
-            return $to;
+    ### uptodate or fetched ok ###
+    if ( $res->code == 304 or $res->code == 200 ) {
+        return $to;
 
-        } else {
-            return $self->_error(loc("Fetch failed! HTTP response: %1 %2 [%3]",
-                        $res->code, HTTP::Status::status_message($res->code),
-                        $res->status_line));
-        }
+    } else {
+        return $self->_error(loc("Fetch failed! HTTP response: %1 %2 [%3]",
+                    $res->code, HTTP::Status::status_message($res->code),
+                    $res->status_line));
+    }
 
 }
 
@@ -617,20 +617,20 @@ sub _httptiny_fetch {
         return;
     }
 
-        my $uri = $self->uri;
+    my $uri = $self->uri;
 
-        my $http = HTTP::Tiny->new( ( $TIMEOUT ? ( timeout => $TIMEOUT ) : () ) );
+    my $http = HTTP::Tiny->new( ( $TIMEOUT ? ( timeout => $TIMEOUT ) : () ) );
 
-        my $rc = $http->mirror( $uri, $to );
+    my $rc = $http->mirror( $uri, $to );
 
-        unless ( $rc->{success} ) {
+    unless ( $rc->{success} ) {
 
-            return $self->_error(loc( "Fetch failed! HTTP response: %1 [%2]",
-                        $rc->{status}, $rc->{reason} ) );
+        return $self->_error(loc( "Fetch failed! HTTP response: %1 [%2]",
+                    $rc->{status}, $rc->{reason} ) );
 
-        }
+    }
 
-        return $to;
+    return $to;
 
 }
 
@@ -656,57 +656,57 @@ sub _httplite_fetch {
         return;
     }
 
-        my $uri = $self->uri;
-        my $retries = 0;
+    my $uri = $self->uri;
+    my $retries = 0;
 
-        RETRIES: while ( $retries++ < 5 ) {
+    RETRIES: while ( $retries++ < 5 ) {
 
-          my $http = HTTP::Lite->new();
-          # Naughty naughty but there isn't any accessor/setter
-          $http->{timeout} = $TIMEOUT if $TIMEOUT;
-          $http->http11_mode(1);
+      my $http = HTTP::Lite->new();
+      # Naughty naughty but there isn't any accessor/setter
+      $http->{timeout} = $TIMEOUT if $TIMEOUT;
+      $http->http11_mode(1);
 
-          my $fh = FileHandle->new;
+      my $fh = FileHandle->new;
 
-          unless ( $fh->open($to,'>') ) {
-            return $self->_error(loc(
-                 "Could not open '%1' for writing: %2",$to,$!));
+      unless ( $fh->open($to,'>') ) {
+        return $self->_error(loc(
+             "Could not open '%1' for writing: %2",$to,$!));
+      }
+
+      $fh->autoflush(1);
+
+      binmode $fh;
+
+      my $rc = $http->request( $uri, sub { my ($self,$dref,$cbargs) = @_; local $\; print {$cbargs} $$dref }, $fh );
+
+      close $fh;
+
+      if ( $rc == 301 || $rc == 302 ) {
+          my $loc;
+          HEADERS: for ($http->headers_array) {
+            /Location: (\S+)/ and $loc = $1, last HEADERS;
           }
-
-          $fh->autoflush(1);
-
-          binmode $fh;
-
-          my $rc = $http->request( $uri, sub { my ($self,$dref,$cbargs) = @_; local $\; print {$cbargs} $$dref }, $fh );
-
-          close $fh;
-
-          if ( $rc == 301 || $rc == 302 ) {
-              my $loc;
-              HEADERS: for ($http->headers_array) {
-                /Location: (\S+)/ and $loc = $1, last HEADERS;
-              }
-              #$loc or last; # Think we should squeal here.
-              if ($loc =~ m!^/!) {
-                $uri =~ s{^(\w+?://[^/]+)/.*$}{$1};
-                $uri .= $loc;
-              }
-              else {
-                $uri = $loc;
-              }
-              next RETRIES;
-          }
-          elsif ( $rc == 200 ) {
-              return $to;
+          #$loc or last; # Think we should squeal here.
+          if ($loc =~ m!^/!) {
+            $uri =~ s{^(\w+?://[^/]+)/.*$}{$1};
+            $uri .= $loc;
           }
           else {
-            return $self->_error(loc("Fetch failed! HTTP response: %1 [%2]",
-                        $rc, $http->status_message));
+            $uri = $loc;
           }
+          next RETRIES;
+      }
+      elsif ( $rc == 200 ) {
+          return $to;
+      }
+      else {
+        return $self->_error(loc("Fetch failed! HTTP response: %1 [%2]",
+                    $rc, $http->status_message));
+      }
 
-        } # Loop for 5 retries.
+    } # Loop for 5 retries.
 
-        return $self->_error("Fetch failed! Gave up after 5 tries");
+    return $self->_error("Fetch failed! Gave up after 5 tries");
 
 }
 
@@ -731,68 +731,68 @@ sub _iosock_fetch {
         return;
     }
 
-        my $sock = IO::Socket::INET->new(
-            PeerHost => $self->host,
-            ( $self->host =~ /:/ ? () : ( PeerPort => 80 ) ),
-        );
+    my $sock = IO::Socket::INET->new(
+        PeerHost => $self->host,
+        ( $self->host =~ /:/ ? () : ( PeerPort => 80 ) ),
+    );
 
-        unless ( $sock ) {
-            return $self->_error(loc("Could not open socket to '%1', '%2'",$self->host,$!));
-        }
+    unless ( $sock ) {
+        return $self->_error(loc("Could not open socket to '%1', '%2'",$self->host,$!));
+    }
 
-        my $fh = FileHandle->new;
+    my $fh = FileHandle->new;
 
-        # Check open()
+    # Check open()
 
-        unless ( $fh->open($to,'>') ) {
-            return $self->_error(loc(
-                 "Could not open '%1' for writing: %2",$to,$!));
-        }
+    unless ( $fh->open($to,'>') ) {
+        return $self->_error(loc(
+             "Could not open '%1' for writing: %2",$to,$!));
+    }
 
-        $fh->autoflush(1);
-        binmode $fh;
+    $fh->autoflush(1);
+    binmode $fh;
 
-        my $path = File::Spec::Unix->catfile( $self->path, $self->file );
-        my $req = "GET $path HTTP/1.0\x0d\x0aHost: " . $self->host . "\x0d\x0a\x0d\x0a";
-        $sock->send( $req );
+    my $path = File::Spec::Unix->catfile( $self->path, $self->file );
+    my $req = "GET $path HTTP/1.0\x0d\x0aHost: " . $self->host . "\x0d\x0a\x0d\x0a";
+    $sock->send( $req );
 
-        my $select = IO::Select->new( $sock );
+    my $select = IO::Select->new( $sock );
 
-        my $resp = '';
-        my $normal = 0;
-        while ( $select->can_read( $TIMEOUT || 60 ) ) {
-          my $ret = $sock->sysread( $resp, 4096, length($resp) );
-          if ( !defined $ret or $ret == 0 ) {
-            $select->remove( $sock );
-            $normal++;
-          }
-        }
-        close $sock;
+    my $resp = '';
+    my $normal = 0;
+    while ( $select->can_read( $TIMEOUT || 60 ) ) {
+      my $ret = $sock->sysread( $resp, 4096, length($resp) );
+      if ( !defined $ret or $ret == 0 ) {
+        $select->remove( $sock );
+        $normal++;
+      }
+    }
+    close $sock;
 
-        unless ( $normal ) {
-            return $self->_error(loc("Socket timed out after '%1' seconds", ( $TIMEOUT || 60 )));
-        }
+    unless ( $normal ) {
+        return $self->_error(loc("Socket timed out after '%1' seconds", ( $TIMEOUT || 60 )));
+    }
 
-        # Check the "response"
-        # Strip preceding blank lines apparently they are allowed (RFC 2616 4.1)
-        $resp =~ s/^(\x0d?\x0a)+//;
-        # Check it is an HTTP response
-        unless ( $resp =~ m!^HTTP/(\d+)\.(\d+)!i ) {
-            return $self->_error(loc("Did not get a HTTP response from '%1'",$self->host));
-        }
+    # Check the "response"
+    # Strip preceding blank lines apparently they are allowed (RFC 2616 4.1)
+    $resp =~ s/^(\x0d?\x0a)+//;
+    # Check it is an HTTP response
+    unless ( $resp =~ m!^HTTP/(\d+)\.(\d+)!i ) {
+        return $self->_error(loc("Did not get a HTTP response from '%1'",$self->host));
+    }
 
-        # Check for OK
-        my ($code) = $resp =~ m!^HTTP/\d+\.\d+\s+(\d+)!i;
-        unless ( $code eq '200' ) {
-            return $self->_error(loc("Got a '%1' from '%2' expected '200'",$code,$self->host));
-        }
+    # Check for OK
+    my ($code) = $resp =~ m!^HTTP/\d+\.\d+\s+(\d+)!i;
+    unless ( $code eq '200' ) {
+        return $self->_error(loc("Got a '%1' from '%2' expected '200'",$code,$self->host));
+    }
 
-        {
-          local $\;
-          print $fh +($resp =~ m/\x0d\x0a\x0d\x0a(.*)$/s )[0];
-        }
-        close $fh;
-        return $to;
+    {
+      local $\;
+      print $fh +($resp =~ m/\x0d\x0a\x0d\x0a(.*)$/s )[0];
+    }
+    close $fh;
+    return $to;
 }
 
 ### Net::FTP fetching
@@ -814,37 +814,37 @@ sub _netftp_fetch {
         return;
     }
 
-        ### make connection ###
-        my $ftp;
-        my @options = ($self->host);
-        push(@options, Timeout => $TIMEOUT) if $TIMEOUT;
-        unless( $ftp = Net::FTP->new( @options ) ) {
-            return $self->_error(loc("Ftp creation failed: %1",$@));
-        }
+    ### make connection ###
+    my $ftp;
+    my @options = ($self->host);
+    push(@options, Timeout => $TIMEOUT) if $TIMEOUT;
+    unless( $ftp = Net::FTP->new( @options ) ) {
+        return $self->_error(loc("Ftp creation failed: %1",$@));
+    }
 
-        ### login ###
-        unless( $ftp->login( anonymous => $FROM_EMAIL ) ) {
-            return $self->_error(loc("Could not login to '%1'",$self->host));
-        }
+    ### login ###
+    unless( $ftp->login( anonymous => $FROM_EMAIL ) ) {
+        return $self->_error(loc("Could not login to '%1'",$self->host));
+    }
 
-        ### set binary mode, just in case ###
-        $ftp->binary;
+    ### set binary mode, just in case ###
+    $ftp->binary;
 
-        ### create the remote path
-        ### remember remote paths are unix paths! [#11483]
-        my $remote = File::Spec::Unix->catfile( $self->path, $self->file );
+    ### create the remote path
+    ### remember remote paths are unix paths! [#11483]
+    my $remote = File::Spec::Unix->catfile( $self->path, $self->file );
 
-        ### fetch the file ###
-        my $target;
-        unless( $target = $ftp->get( $remote, $to ) ) {
-            return $self->_error(loc("Could not fetch '%1' from '%2'",
-                        $remote, $self->host));
-        }
+    ### fetch the file ###
+    my $target;
+    unless( $target = $ftp->get( $remote, $to ) ) {
+        return $self->_error(loc("Could not fetch '%1' from '%2'",
+                    $remote, $self->host));
+    }
 
-        ### log out ###
-        $ftp->quit;
+    ### log out ###
+    $ftp->quit;
 
-        return $target;
+    return $target;
 
 }
 
@@ -866,39 +866,39 @@ sub _wget_fetch {
         return;
     }
 
-        ### no verboseness, thanks ###
-        my $cmd = [ $wget, '--quiet' ];
+    ### no verboseness, thanks ###
+    my $cmd = [ $wget, '--quiet' ];
 
-        ### if a timeout is set, add it ###
-        push(@$cmd, '--timeout=' . $TIMEOUT) if $TIMEOUT;
+    ### if a timeout is set, add it ###
+    push(@$cmd, '--timeout=' . $TIMEOUT) if $TIMEOUT;
 
-        ### run passive if specified ###
-        push @$cmd, '--passive-ftp' if $FTP_PASSIVE;
+    ### run passive if specified ###
+    push @$cmd, '--passive-ftp' if $FTP_PASSIVE;
 
-        ### set the output document, add the uri ###
-        push @$cmd, '--output-document', $to, $self->uri;
+    ### set the output document, add the uri ###
+    push @$cmd, '--output-document', $to, $self->uri;
 
-        ### with IPC::Cmd > 0.41, this is fixed in teh library,
-        ### and there's no need for special casing any more.
-        ### DO NOT quote things for IPC::Run, it breaks stuff.
-        # $IPC::Cmd::USE_IPC_RUN
-        #    ? ($to, $self->uri)
-        #    : (QUOTE. $to .QUOTE, QUOTE. $self->uri .QUOTE);
+    ### with IPC::Cmd > 0.41, this is fixed in teh library,
+    ### and there's no need for special casing any more.
+    ### DO NOT quote things for IPC::Run, it breaks stuff.
+    # $IPC::Cmd::USE_IPC_RUN
+    #    ? ($to, $self->uri)
+    #    : (QUOTE. $to .QUOTE, QUOTE. $self->uri .QUOTE);
 
-        ### shell out ###
-        my $captured;
-        unless(run( command => $cmd,
-                    buffer  => \$captured,
-                    verbose => $DEBUG
-        )) {
-            ### wget creates the output document always, even if the fetch
-            ### fails.. so unlink it in that case
-            1 while unlink $to;
+    ### shell out ###
+    my $captured;
+    unless(run( command => $cmd,
+                buffer  => \$captured,
+                verbose => $DEBUG
+    )) {
+        ### wget creates the output document always, even if the fetch
+        ### fails.. so unlink it in that case
+        1 while unlink $to;
 
-            return $self->_error(loc( "Command failed: %1", $captured || '' ));
-        }
+        return $self->_error(loc( "Command failed: %1", $captured || '' ));
+    }
 
-        return $to;
+    return $to;
 }
 
 ### /bin/lftp fetch ###
@@ -919,59 +919,59 @@ sub _lftp_fetch {
         return;
     }
 
-        ### no verboseness, thanks ###
-        my $cmd = [ $lftp, '-f' ];
+    ### no verboseness, thanks ###
+    my $cmd = [ $lftp, '-f' ];
 
-        my $fh = File::Temp->new;
+    my $fh = File::Temp->new;
 
-        my $str;
+    my $str;
 
-        ### if a timeout is set, add it ###
-        $str .= "set net:timeout $TIMEOUT;\n" if $TIMEOUT;
+    ### if a timeout is set, add it ###
+    $str .= "set net:timeout $TIMEOUT;\n" if $TIMEOUT;
 
-        ### run passive if specified ###
-        $str .= "set ftp:passive-mode 1;\n" if $FTP_PASSIVE;
+    ### run passive if specified ###
+    $str .= "set ftp:passive-mode 1;\n" if $FTP_PASSIVE;
 
-        ### set the output document, add the uri ###
-        ### quote the URI, because lftp supports certain shell
-        ### expansions, most notably & for backgrounding.
-        ### ' quote does nto work, must be "
-        $str .= q[get ']. $self->uri .q[' -o ]. $to . $/;
+    ### set the output document, add the uri ###
+    ### quote the URI, because lftp supports certain shell
+    ### expansions, most notably & for backgrounding.
+    ### ' quote does nto work, must be "
+    $str .= q[get ']. $self->uri .q[' -o ]. $to . $/;
 
-        if( $DEBUG ) {
-            my $pp_str = join ' ', split $/, $str;
-            print "# lftp command: $pp_str\n";
-        }
+    if( $DEBUG ) {
+        my $pp_str = join ' ', split $/, $str;
+        print "# lftp command: $pp_str\n";
+    }
 
-        ### write straight to the file.
-        $fh->autoflush(1);
-        print $fh $str;
+    ### write straight to the file.
+    $fh->autoflush(1);
+    print $fh $str;
 
-        ### the command needs to be 1 string to be executed
-        push @$cmd, $fh->filename;
+    ### the command needs to be 1 string to be executed
+    push @$cmd, $fh->filename;
 
-        ### with IPC::Cmd > 0.41, this is fixed in teh library,
-        ### and there's no need for special casing any more.
-        ### DO NOT quote things for IPC::Run, it breaks stuff.
-        # $IPC::Cmd::USE_IPC_RUN
-        #    ? ($to, $self->uri)
-        #    : (QUOTE. $to .QUOTE, QUOTE. $self->uri .QUOTE);
+    ### with IPC::Cmd > 0.41, this is fixed in teh library,
+    ### and there's no need for special casing any more.
+    ### DO NOT quote things for IPC::Run, it breaks stuff.
+    # $IPC::Cmd::USE_IPC_RUN
+    #    ? ($to, $self->uri)
+    #    : (QUOTE. $to .QUOTE, QUOTE. $self->uri .QUOTE);
 
 
-        ### shell out ###
-        my $captured;
-        unless(run( command => $cmd,
-                    buffer  => \$captured,
-                    verbose => $DEBUG
-        )) {
-            ### wget creates the output document always, even if the fetch
-            ### fails.. so unlink it in that case
-            1 while unlink $to;
+    ### shell out ###
+    my $captured;
+    unless(run( command => $cmd,
+                buffer  => \$captured,
+                verbose => $DEBUG
+    )) {
+        ### wget creates the output document always, even if the fetch
+        ### fails.. so unlink it in that case
+        1 while unlink $to;
 
-            return $self->_error(loc( "Command failed: %1", $captured || '' ));
-        }
+        return $self->_error(loc( "Command failed: %1", $captured || '' ));
+    }
 
-        return $to;
+    return $to;
 }
 
 
@@ -994,29 +994,29 @@ sub _ftp_fetch {
         return;
     }
 
-        my $fh = FileHandle->new;
+    my $fh = FileHandle->new;
 
-        local $SIG{CHLD} = 'IGNORE';
+    local $SIG{CHLD} = 'IGNORE';
 
-        unless ($fh->open("|$ftp -n")) {
-            return $self->_error(loc("%1 creation failed: %2", $ftp, $!));
-        }
+    unless ($fh->open("|$ftp -n")) {
+        return $self->_error(loc("%1 creation failed: %2", $ftp, $!));
+    }
 
-        my @dialog = (
-            "lcd " . dirname($to),
-            "open " . $self->host,
-            "user anonymous $FROM_EMAIL",
-            "cd /",
-            "cd " . $self->path,
-            "binary",
-            "get " . $self->file . " " . $self->output_file,
-            "quit",
-        );
+    my @dialog = (
+        "lcd " . dirname($to),
+        "open " . $self->host,
+        "user anonymous $FROM_EMAIL",
+        "cd /",
+        "cd " . $self->path,
+        "binary",
+        "get " . $self->file . " " . $self->output_file,
+        "quit",
+    );
 
-        foreach (@dialog) { $fh->print($_, "\n") }
-        $fh->close or return;
+    foreach (@dialog) { $fh->print($_, "\n") }
+    $fh->close or return;
 
-        return $to;
+    return $to;
 }
 
 ### lynx is stupid - it decompresses any .gz file it finds to be text
@@ -1038,87 +1038,87 @@ sub _lynx_fetch {
         return;
     }
 
-        unless( IPC::Cmd->can_capture_buffer ) {
-            $METHOD_FAIL->{'lynx'} = 1;
+    unless( IPC::Cmd->can_capture_buffer ) {
+        $METHOD_FAIL->{'lynx'} = 1;
 
-            return $self->_error(loc(
-                "Can not capture buffers. Can not use '%1' to fetch files",
-                'lynx' ));
-        }
+        return $self->_error(loc(
+            "Can not capture buffers. Can not use '%1' to fetch files",
+            'lynx' ));
+    }
 
-        ### check if the HTTP resource exists ###
-        if ($self->uri =~ /^https?:\/\//i) {
-            my $cmd = [
-                $lynx,
-                '-head',
-                '-source',
-                "-auth=anonymous:$FROM_EMAIL",
-            ];
-
-            push @$cmd, "-connect_timeout=$TIMEOUT" if $TIMEOUT;
-
-            push @$cmd, $self->uri;
-
-            ### shell out ###
-            my $head;
-            unless(run( command => $cmd,
-                        buffer  => \$head,
-                        verbose => $DEBUG )
-            ) {
-                return $self->_error(loc("Command failed: %1", $head || ''));
-            }
-
-            unless($head =~ /^HTTP\/\d+\.\d+ 200\b/) {
-                return $self->_error(loc("Command failed: %1", $head || ''));
-            }
-        }
-
-        ### write to the output file ourselves, since lynx ass_u_mes to much
-        my $local = FileHandle->new(">$to")
-                        or return $self->_error(loc(
-                            "Could not open '%1' for writing: %2",$to,$!));
-
-        ### dump to stdout ###
+    ### check if the HTTP resource exists ###
+    if ($self->uri =~ /^https?:\/\//i) {
         my $cmd = [
             $lynx,
+            '-head',
             '-source',
             "-auth=anonymous:$FROM_EMAIL",
         ];
 
         push @$cmd, "-connect_timeout=$TIMEOUT" if $TIMEOUT;
 
-        ### DO NOT quote things for IPC::Run, it breaks stuff.
         push @$cmd, $self->uri;
 
-        ### with IPC::Cmd > 0.41, this is fixed in teh library,
-        ### and there's no need for special casing any more.
-        ### DO NOT quote things for IPC::Run, it breaks stuff.
-        # $IPC::Cmd::USE_IPC_RUN
-        #    ? $self->uri
-        #    : QUOTE. $self->uri .QUOTE;
-
-
         ### shell out ###
-        my $captured;
+        my $head;
         unless(run( command => $cmd,
-                    buffer  => \$captured,
+                    buffer  => \$head,
                     verbose => $DEBUG )
         ) {
-            return $self->_error(loc("Command failed: %1", $captured || ''));
+            return $self->_error(loc("Command failed: %1", $head || ''));
         }
 
-        ### print to local file ###
-        ### XXX on a 404 with a special error page, $captured will actually
-        ### hold the contents of that page, and make it *appear* like the
-        ### request was a success, when really it wasn't :(
-        ### there doesn't seem to be an option for lynx to change the exit
-        ### code based on a 4XX status or so.
-        ### the closest we can come is using --error_file and parsing that,
-        ### which is very unreliable ;(
-        $local->print( $captured );
-        $local->close or return;
+        unless($head =~ /^HTTP\/\d+\.\d+ 200\b/) {
+            return $self->_error(loc("Command failed: %1", $head || ''));
+        }
+    }
 
-        return $to;
+    ### write to the output file ourselves, since lynx ass_u_mes to much
+    my $local = FileHandle->new(">$to")
+                    or return $self->_error(loc(
+                        "Could not open '%1' for writing: %2",$to,$!));
+
+    ### dump to stdout ###
+    my $cmd = [
+        $lynx,
+        '-source',
+        "-auth=anonymous:$FROM_EMAIL",
+    ];
+
+    push @$cmd, "-connect_timeout=$TIMEOUT" if $TIMEOUT;
+
+    ### DO NOT quote things for IPC::Run, it breaks stuff.
+    push @$cmd, $self->uri;
+
+    ### with IPC::Cmd > 0.41, this is fixed in teh library,
+    ### and there's no need for special casing any more.
+    ### DO NOT quote things for IPC::Run, it breaks stuff.
+    # $IPC::Cmd::USE_IPC_RUN
+    #    ? $self->uri
+    #    : QUOTE. $self->uri .QUOTE;
+
+
+    ### shell out ###
+    my $captured;
+    unless(run( command => $cmd,
+                buffer  => \$captured,
+                verbose => $DEBUG )
+    ) {
+        return $self->_error(loc("Command failed: %1", $captured || ''));
+    }
+
+    ### print to local file ###
+    ### XXX on a 404 with a special error page, $captured will actually
+    ### hold the contents of that page, and make it *appear* like the
+    ### request was a success, when really it wasn't :(
+    ### there doesn't seem to be an option for lynx to change the exit
+    ### code based on a 4XX status or so.
+    ### the closest we can come is using --error_file and parsing that,
+    ### which is very unreliable ;(
+    $local->print( $captured );
+    $local->close or return;
+
+    return $to;
 }
 
 ### use /bin/ncftp to fetch files
@@ -1143,31 +1143,31 @@ sub _ncftp_fetch {
         return;
     }
 
-        my $cmd = [
-            $ncftp,
-            '-V',                   # do not be verbose
-            '-p', $FROM_EMAIL,      # email as password
-            $self->host,            # hostname
-            dirname($to),           # local dir for the file
-                                    # remote path to the file
-            ### DO NOT quote things for IPC::Run, it breaks stuff.
-            $IPC::Cmd::USE_IPC_RUN
-                        ? File::Spec::Unix->catdir( $self->path, $self->file )
-                        : QUOTE. File::Spec::Unix->catdir(
-                                        $self->path, $self->file ) .QUOTE
+    my $cmd = [
+        $ncftp,
+        '-V',                   # do not be verbose
+        '-p', $FROM_EMAIL,      # email as password
+        $self->host,            # hostname
+        dirname($to),           # local dir for the file
+                                # remote path to the file
+        ### DO NOT quote things for IPC::Run, it breaks stuff.
+        $IPC::Cmd::USE_IPC_RUN
+                    ? File::Spec::Unix->catdir( $self->path, $self->file )
+                    : QUOTE. File::Spec::Unix->catdir(
+                                    $self->path, $self->file ) .QUOTE
 
-        ];
+    ];
 
-        ### shell out ###
-        my $captured;
-        unless(run( command => $cmd,
-                    buffer  => \$captured,
-                    verbose => $DEBUG )
-        ) {
-            return $self->_error(loc("Command failed: %1", $captured || ''));
-        }
+    ### shell out ###
+    my $captured;
+    unless(run( command => $cmd,
+                buffer  => \$captured,
+                verbose => $DEBUG )
+    ) {
+        return $self->_error(loc("Command failed: %1", $captured || ''));
+    }
 
-        return $to;
+    return $to;
 
 }
 
@@ -1187,40 +1187,40 @@ sub _curl_fetch {
         return;
     }
 
-        ### these long opts are self explanatory - I like that -jmb
-	    my $cmd = [ $curl, '-q' ];
+    ### these long opts are self explanatory - I like that -jmb
+    my $cmd = [ $curl, '-q' ];
 
-	    push(@$cmd, '--connect-timeout', $TIMEOUT) if $TIMEOUT;
+    push(@$cmd, '--connect-timeout', $TIMEOUT) if $TIMEOUT;
 
-	    push(@$cmd, '--silent') unless $DEBUG;
+    push(@$cmd, '--silent') unless $DEBUG;
 
-        ### curl does the right thing with passive, regardless ###
-    	if ($self->scheme eq 'ftp') {
-    		push(@$cmd, '--user', "anonymous:$FROM_EMAIL");
-    	}
+    ### curl does the right thing with passive, regardless ###
+    if ($self->scheme eq 'ftp') {
+        push(@$cmd, '--user', "anonymous:$FROM_EMAIL");
+    }
 
-        ### curl doesn't follow 302 (temporarily moved) etc automatically
-        ### so we add --location to enable that.
-        push @$cmd, '--fail', '--location', '--output', $to, $self->uri;
+    ### curl doesn't follow 302 (temporarily moved) etc automatically
+    ### so we add --location to enable that.
+    push @$cmd, '--fail', '--location', '--output', $to, $self->uri;
 
-        ### with IPC::Cmd > 0.41, this is fixed in teh library,
-        ### and there's no need for special casing any more.
-        ### DO NOT quote things for IPC::Run, it breaks stuff.
-        # $IPC::Cmd::USE_IPC_RUN
-        #    ? ($to, $self->uri)
-        #    : (QUOTE. $to .QUOTE, QUOTE. $self->uri .QUOTE);
+    ### with IPC::Cmd > 0.41, this is fixed in teh library,
+    ### and there's no need for special casing any more.
+    ### DO NOT quote things for IPC::Run, it breaks stuff.
+    # $IPC::Cmd::USE_IPC_RUN
+    #    ? ($to, $self->uri)
+    #    : (QUOTE. $to .QUOTE, QUOTE. $self->uri .QUOTE);
 
 
-        my $captured;
-        unless(run( command => $cmd,
-                    buffer  => \$captured,
-                    verbose => $DEBUG )
-        ) {
+    my $captured;
+    unless(run( command => $cmd,
+                buffer  => \$captured,
+                verbose => $DEBUG )
+    ) {
 
-            return $self->_error(loc("Command failed: %1", $captured || ''));
-        }
+        return $self->_error(loc("Command failed: %1", $captured || ''));
+    }
 
-        return $to;
+    return $to;
 
 }
 
@@ -1242,40 +1242,40 @@ sub _fetch_fetch {
         return;
     }
 
-        ### no verboseness, thanks ###
-        my $cmd = [ $fetch, '-q' ];
+    ### no verboseness, thanks ###
+    my $cmd = [ $fetch, '-q' ];
 
-        ### if a timeout is set, add it ###
-        push(@$cmd, '-T', $TIMEOUT) if $TIMEOUT;
+    ### if a timeout is set, add it ###
+    push(@$cmd, '-T', $TIMEOUT) if $TIMEOUT;
 
-        ### run passive if specified ###
-        #push @$cmd, '-p' if $FTP_PASSIVE;
-        local $ENV{'FTP_PASSIVE_MODE'} = 1 if $FTP_PASSIVE;
+    ### run passive if specified ###
+    #push @$cmd, '-p' if $FTP_PASSIVE;
+    local $ENV{'FTP_PASSIVE_MODE'} = 1 if $FTP_PASSIVE;
 
-        ### set the output document, add the uri ###
-        push @$cmd, '-o', $to, $self->uri;
+    ### set the output document, add the uri ###
+    push @$cmd, '-o', $to, $self->uri;
 
-        ### with IPC::Cmd > 0.41, this is fixed in teh library,
-        ### and there's no need for special casing any more.
-        ### DO NOT quote things for IPC::Run, it breaks stuff.
-        # $IPC::Cmd::USE_IPC_RUN
-        #    ? ($to, $self->uri)
-        #    : (QUOTE. $to .QUOTE, QUOTE. $self->uri .QUOTE);
+    ### with IPC::Cmd > 0.41, this is fixed in teh library,
+    ### and there's no need for special casing any more.
+    ### DO NOT quote things for IPC::Run, it breaks stuff.
+    # $IPC::Cmd::USE_IPC_RUN
+    #    ? ($to, $self->uri)
+    #    : (QUOTE. $to .QUOTE, QUOTE. $self->uri .QUOTE);
 
-        ### shell out ###
-        my $captured;
-        unless(run( command => $cmd,
-                    buffer  => \$captured,
-                    verbose => $DEBUG
-        )) {
-            ### wget creates the output document always, even if the fetch
-            ### fails.. so unlink it in that case
-            1 while unlink $to;
+    ### shell out ###
+    my $captured;
+    unless(run( command => $cmd,
+                buffer  => \$captured,
+                verbose => $DEBUG
+    )) {
+        ### wget creates the output document always, even if the fetch
+        ### fails.. so unlink it in that case
+        1 while unlink $to;
 
-            return $self->_error(loc( "Command failed: %1", $captured || '' ));
-        }
+        return $self->_error(loc( "Command failed: %1", $captured || '' ));
+    }
 
-        return $to;
+    return $to;
 }
 
 ### use File::Copy for fetching file:// urls ###
@@ -1367,34 +1367,34 @@ sub _rsync_fetch {
         return;
     }
 
-        my $cmd = [ $rsync ];
+    my $cmd = [ $rsync ];
 
-        ### XXX: rsync has no I/O timeouts at all, by default
-        push(@$cmd, '--timeout=' . $TIMEOUT) if $TIMEOUT;
+    ### XXX: rsync has no I/O timeouts at all, by default
+    push(@$cmd, '--timeout=' . $TIMEOUT) if $TIMEOUT;
 
-        push(@$cmd, '--quiet') unless $DEBUG;
+    push(@$cmd, '--quiet') unless $DEBUG;
 
-        ### DO NOT quote things for IPC::Run, it breaks stuff.
-        push @$cmd, $self->uri, $to;
+    ### DO NOT quote things for IPC::Run, it breaks stuff.
+    push @$cmd, $self->uri, $to;
 
-        ### with IPC::Cmd > 0.41, this is fixed in teh library,
-        ### and there's no need for special casing any more.
-        ### DO NOT quote things for IPC::Run, it breaks stuff.
-        # $IPC::Cmd::USE_IPC_RUN
-        #    ? ($to, $self->uri)
-        #    : (QUOTE. $to .QUOTE, QUOTE. $self->uri .QUOTE);
+    ### with IPC::Cmd > 0.41, this is fixed in teh library,
+    ### and there's no need for special casing any more.
+    ### DO NOT quote things for IPC::Run, it breaks stuff.
+    # $IPC::Cmd::USE_IPC_RUN
+    #    ? ($to, $self->uri)
+    #    : (QUOTE. $to .QUOTE, QUOTE. $self->uri .QUOTE);
 
-        my $captured;
-        unless(run( command => $cmd,
-                    buffer  => \$captured,
-                    verbose => $DEBUG )
-        ) {
+    my $captured;
+    unless(run( command => $cmd,
+                buffer  => \$captured,
+                verbose => $DEBUG )
+    ) {
 
-            return $self->_error(loc("Command %1 failed: %2",
-                "@$cmd" || '', $captured || ''));
-        }
+        return $self->_error(loc("Command %1 failed: %2",
+            "@$cmd" || '', $captured || ''));
+    }
 
-        return $to;
+    return $to;
 
 }
 
