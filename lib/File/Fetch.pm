@@ -560,7 +560,10 @@ sub _lwp_fetch {
 
     };
 
-    if( can_load(modules => $use_list) ) {
+    unless( can_load( modules => $use_list ) ) {
+        $METHOD_FAIL->{'lwp'} = 1;
+        return;
+    }
 
         ### setup the uri object
         my $uri = URI->new( File::Spec::Unix->catfile(
@@ -591,10 +594,6 @@ sub _lwp_fetch {
                         $res->status_line));
         }
 
-    } else {
-        $METHOD_FAIL->{'lwp'} = 1;
-        return;
-    }
 }
 
 ### HTTP::Tiny fetching ###
@@ -613,7 +612,10 @@ sub _httptiny_fetch {
 
     };
 
-    if( can_load(modules => $use_list) ) {
+    unless( can_load(modules => $use_list) ) {
+        $METHOD_FAIL->{'httptiny'} = 1;
+        return;
+    }
 
         my $uri = $self->uri;
 
@@ -630,11 +632,6 @@ sub _httptiny_fetch {
 
         return $to;
 
-    }
-    else {
-        $METHOD_FAIL->{'httptiny'} = 1;
-        return;
-    }
 }
 
 ### HTTP::Lite fetching ###
@@ -654,7 +651,10 @@ sub _httplite_fetch {
 
     };
 
-    if( can_load(modules => $use_list) ) {
+    unless( can_load(modules => $use_list) ) {
+        $METHOD_FAIL->{'httplite'} = 1;
+        return;
+    }
 
         my $uri = $self->uri;
         my $retries = 0;
@@ -708,10 +708,6 @@ sub _httplite_fetch {
 
         return $self->_error("Fetch failed! Gave up after 5 tries");
 
-    } else {
-        $METHOD_FAIL->{'httplite'} = 1;
-        return;
-    }
 }
 
 ### Simple IO::Socket::INET fetching ###
@@ -730,7 +726,11 @@ sub _iosock_fetch {
         'IO::Select'       => '0.0',
     };
 
-    if( can_load(modules => $use_list) ) {
+    unless( can_load(modules => $use_list) ) {
+        $METHOD_FAIL->{'iosock'} = 1;
+        return;
+    }
+
         my $sock = IO::Socket::INET->new(
             PeerHost => $self->host,
             ( $self->host =~ /:/ ? () : ( PeerPort => 80 ) ),
@@ -793,11 +793,6 @@ sub _iosock_fetch {
         }
         close $fh;
         return $to;
-
-    } else {
-        $METHOD_FAIL->{'iosock'} = 1;
-        return;
-    }
 }
 
 ### Net::FTP fetching
@@ -814,7 +809,10 @@ sub _netftp_fetch {
     ### required modules ###
     my $use_list = { 'Net::FTP' => 0 };
 
-    if( can_load( modules => $use_list ) ) {
+    unless( can_load( modules => $use_list ) ) {
+        $METHOD_FAIL->{'netftp'} = 1;
+        return;
+    }
 
         ### make connection ###
         my $ftp;
@@ -848,10 +846,6 @@ sub _netftp_fetch {
 
         return $target;
 
-    } else {
-        $METHOD_FAIL->{'netftp'} = 1;
-        return;
-    }
 }
 
 ### /bin/wget fetch ###
@@ -865,8 +859,12 @@ sub _wget_fetch {
     };
     check( $tmpl, \%hash ) or return;
 
+    my $wget;
     ### see if we have a wget binary ###
-    if( my $wget = can_run('wget') ) {
+    unless( $wget = can_run('wget') ) {
+        $METHOD_FAIL->{'wget'} = 1;
+        return;
+    }
 
         ### no verboseness, thanks ###
         my $cmd = [ $wget, '--quiet' ];
@@ -901,11 +899,6 @@ sub _wget_fetch {
         }
 
         return $to;
-
-    } else {
-        $METHOD_FAIL->{'wget'} = 1;
-        return;
-    }
 }
 
 ### /bin/lftp fetch ###
@@ -919,8 +912,12 @@ sub _lftp_fetch {
     };
     check( $tmpl, \%hash ) or return;
 
-    ### see if we have a wget binary ###
-    if( my $lftp = can_run('lftp') ) {
+    ### see if we have a lftp binary ###
+    my $lftp;
+    unless( $lftp = can_run('lftp') ) {
+        $METHOD_FAIL->{'lftp'} = 1;
+        return;
+    }
 
         ### no verboseness, thanks ###
         my $cmd = [ $lftp, '-f' ];
@@ -975,11 +972,6 @@ sub _lftp_fetch {
         }
 
         return $to;
-
-    } else {
-        $METHOD_FAIL->{'lftp'} = 1;
-        return;
-    }
 }
 
 
@@ -996,7 +988,11 @@ sub _ftp_fetch {
     check( $tmpl, \%hash ) or return;
 
     ### see if we have a ftp binary ###
-    if( my $ftp = can_run('ftp') ) {
+    my $ftp;
+    unless( $ftp = can_run('ftp') ) {
+        $METHOD_FAIL->{'ftp'} = 1;
+        return;
+    }
 
         my $fh = FileHandle->new;
 
@@ -1021,7 +1017,6 @@ sub _ftp_fetch {
         $fh->close or return;
 
         return $to;
-    }
 }
 
 ### lynx is stupid - it decompresses any .gz file it finds to be text
@@ -1037,7 +1032,11 @@ sub _lynx_fetch {
     check( $tmpl, \%hash ) or return;
 
     ### see if we have a lynx binary ###
-    if( my $lynx = can_run('lynx') ) {
+    my $lynx;
+    unless ( $lynx = can_run('lynx') ){
+        $METHOD_FAIL->{'lynx'} = 1;
+        return;
+    }
 
         unless( IPC::Cmd->can_capture_buffer ) {
             $METHOD_FAIL->{'lynx'} = 1;
@@ -1120,11 +1119,6 @@ sub _lynx_fetch {
         $local->close or return;
 
         return $to;
-
-    } else {
-        $METHOD_FAIL->{'lynx'} = 1;
-        return;
-    }
 }
 
 ### use /bin/ncftp to fetch files
@@ -1143,7 +1137,11 @@ sub _ncftp_fetch {
     return if $FTP_PASSIVE;
 
     ### see if we have a ncftp binary ###
-    if( my $ncftp = can_run('ncftp') ) {
+    my $ncftp;
+    unless( $ncftp = can_run('ncftp') ) {
+        $METHOD_FAIL->{'ncftp'} = 1;
+        return;
+    }
 
         my $cmd = [
             $ncftp,
@@ -1171,10 +1169,6 @@ sub _ncftp_fetch {
 
         return $to;
 
-    } else {
-        $METHOD_FAIL->{'ncftp'} = 1;
-        return;
-    }
 }
 
 ### use /bin/curl to fetch files
@@ -1187,8 +1181,11 @@ sub _curl_fetch {
         to  => { required => 1, store => \$to }
     };
     check( $tmpl, \%hash ) or return;
-
-    if (my $curl = can_run('curl')) {
+    my $curl;
+    unless ( $curl = can_run('curl') ) {
+        $METHOD_FAIL->{'curl'} = 1;
+        return;
+    }
 
         ### these long opts are self explanatory - I like that -jmb
 	    my $cmd = [ $curl, '-q' ];
@@ -1225,10 +1222,6 @@ sub _curl_fetch {
 
         return $to;
 
-    } else {
-        $METHOD_FAIL->{'curl'} = 1;
-        return;
-    }
 }
 
 ### /usr/bin/fetch fetch! ###
@@ -1242,8 +1235,12 @@ sub _fetch_fetch {
     };
     check( $tmpl, \%hash ) or return;
 
-    ### see if we have a wget binary ###
-    if( HAS_FETCH and my $fetch = can_run('fetch') ) {
+    ### see if we have a fetch binary ###
+    my $fetch;
+    unless( HAS_FETCH and $fetch = can_run('fetch') ) {
+        $METHOD_FAIL->{'fetch'} = 1;
+        return;
+    }
 
         ### no verboseness, thanks ###
         my $cmd = [ $fetch, '-q' ];
@@ -1279,11 +1276,6 @@ sub _fetch_fetch {
         }
 
         return $to;
-
-    } else {
-        $METHOD_FAIL->{'wget'} = 1;
-        return;
-    }
 }
 
 ### use File::Copy for fetching file:// urls ###
@@ -1369,8 +1361,11 @@ sub _rsync_fetch {
         to  => { required => 1, store => \$to }
     };
     check( $tmpl, \%hash ) or return;
-
-    if (my $rsync = can_run('rsync')) {
+    my $rsync;
+    unless ( $rsync = can_run('rsync') ) {
+        $METHOD_FAIL->{'rsync'} = 1;
+        return;
+    }
 
         my $cmd = [ $rsync ];
 
@@ -1401,10 +1396,6 @@ sub _rsync_fetch {
 
         return $to;
 
-    } else {
-        $METHOD_FAIL->{'rsync'} = 1;
-        return;
-    }
 }
 
 #################################
