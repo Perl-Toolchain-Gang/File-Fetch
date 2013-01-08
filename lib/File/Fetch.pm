@@ -164,6 +164,7 @@ http://www.abc.net.au/ the contents retrieved may be from a remote file called
         vol             => { default => '' }, # windows for file:// uris
         share           => { default => '' }, # windows for file:// uris
         file_default    => { default => 'file_default' },
+        tempdir_root    => { required => 1 }, # Should be lazy-set at ->new()
         _error_msg      => { no_override => 1 },
         _error_msg_long => { no_override => 1 },
     };
@@ -277,10 +278,11 @@ sub new {
     my $class = shift;
     my %hash  = @_;
 
-    my ($uri, $file_default);
+    my ($uri, $file_default, $tempdir_root);
     my $tmpl = {
         uri          => { required => 1, store => \$uri },
         file_default => { required => 0, store => \$file_default },
+        tempdir_root => { required => 0, store => \$tempdir_root },
     };
 
     check( $tmpl, \%hash ) or return;
@@ -289,6 +291,8 @@ sub new {
     my $href    = $class->_parse_uri( $uri ) or return;
 
     $href->{file_default} = $file_default if $file_default;
+    $href->{tempdir_root} = File::Spec->rel2abs( $tempdir_root ) if $tempdir_root;
+    $href->{tempdir_root} = File::Spec->rel2abs( Cwd::cwd      ) if not $href->{tempdir_root};
 
     ### make it into a FFI object ###
     my $ff      = $class->_create( %$href ) or return;
@@ -444,7 +448,7 @@ sub fetch {
     my ($to, $fh);
     ### you want us to slurp the contents
     if( ref $target and UNIVERSAL::isa( $target, 'SCALAR' ) ) {
-        $to = tempdir( 'FileFetch.XXXXXX', CLEANUP => 1 );
+        $to = tempdir( 'FileFetch.XXXXXX', DIR => $self->tempdir_root, CLEANUP => 1 );
 
     ### plain old fetch
     } else {
