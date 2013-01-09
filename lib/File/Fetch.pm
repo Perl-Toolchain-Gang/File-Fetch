@@ -1002,7 +1002,7 @@ sub _ftp_fetch {
 
     local $SIG{CHLD} = 'IGNORE';
 
-    unless ($fh->open("|$ftp -n")) {
+    unless ($fh->open("$ftp -n", '|-')) {
         return $self->_error(loc("%1 creation failed: %2", $ftp, $!));
     }
 
@@ -1078,7 +1078,7 @@ sub _lynx_fetch {
     }
 
     ### write to the output file ourselves, since lynx ass_u_mes to much
-    my $local = FileHandle->new(">$to")
+    my $local = FileHandle->new( $to, 'w' )
                     or return $self->_error(loc(
                         "Could not open '%1' for writing: %2",$to,$!));
 
