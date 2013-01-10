@@ -1,3 +1,8 @@
+Changes for 0.38        Thu Jan 10 20:52:53 2013
+=================================================
+* Add support for an optional tempdir_root
+  parameter (Kent Fredric)
+
 Changes for 0.36        Thu Jun 28 13:41:31 2012
 =================================================
 * Added 'file_default' option for URLs that do
