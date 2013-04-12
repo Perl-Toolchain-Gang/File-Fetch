@@ -1,3 +1,7 @@
+Changes for 0.42        Fri Apr 12 15:28:34 2013
+=================================================
+* Skip slurp tests for git://
+
 Changes for 0.40        Fri Apr 12 11:18:52 2013
 =================================================
 * Added git:// url support
