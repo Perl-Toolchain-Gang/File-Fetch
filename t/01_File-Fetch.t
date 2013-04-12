@@ -46,7 +46,7 @@ if( $File::Fetch::DEBUG ) {
 }
 
 ### Heuristics
-my %heuristics = map { $_ => 1 } qw(http ftp rsync file);
+my %heuristics = map { $_ => 1 } qw(http ftp rsync file git);
 ### _parse_uri tests
 ### these go on all platforms
 my @map = (
@@ -61,6 +61,12 @@ my @map = (
         host	=> 'cpan.pair.com',
         path	=> '/CPAN/',
         file	=> 'MIRRORING.FROM',
+    },
+    {	uri	    => 'git://github.com/jib/file-fetch.git',
+        scheme	=> 'git',
+        host	=> 'github.com',
+        path	=> '/jib/',
+        file	=> 'file-fetch.git',
     },
     {   uri     => 'http://localhost/tmp/index.txt',
         scheme  => 'http',
@@ -213,6 +219,21 @@ for my $entry (@map) {
 
     for (qw[rsync]) {
         _fetch_uri( rsync => $uri, $_ );
+    }
+}
+
+### Heuristics
+{
+  require IO::Socket::INET;
+  my $sock = IO::Socket::INET->new( PeerAddr => 'github.com', PeerPort => 9418, Timeout => 20 )
+     or $heuristics{git} = 0;
+}
+
+### git:// tests ###
+{   my $uri = 'git://github.com/jib/file-fetch.git';
+
+    for (qw[git]) {
+        _fetch_uri( git => $uri, $_ );
     }
 }
 
