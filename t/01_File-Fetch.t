@@ -262,7 +262,7 @@ sub _fetch_uri {
         for my $to ( 'tmp', do { \my $o } ) { SKIP: {
 
 
-            my $how     = ref $to ? 'slurp' : 'file';
+            my $how     = ref $to && $type ne 'git' ? 'slurp' : 'file';
             my $skip    = ref $to ? 4       : 3;
 
             ok( 1,              "   Fetching '$uri' in $how mode" );
@@ -280,7 +280,7 @@ sub _fetch_uri {
             ok( $file,          "   File ($file) fetched with $method ($uri)" );
 
             ### check we got some contents if we were meant to slurp
-            if( ref $to ) {
+            if( ref $to && $type ne 'git' ) {
                 ok( $$to,       "   Contents slurped" );
             }
 
