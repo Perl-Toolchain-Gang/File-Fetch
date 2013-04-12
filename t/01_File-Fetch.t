@@ -7,6 +7,7 @@ use Test::More 'no_plan';
 
 use Cwd             qw[cwd];
 use File::Basename  qw[basename];
+use File::Path      qw[rmtree];
 use Data::Dumper;
 
 use_ok('File::Fetch');
@@ -288,7 +289,7 @@ sub _fetch_uri {
             is( $file && basename($file), $ff->output_file,
                                 "   File has expected name" );
 
-            unlink $file;
+            rmtree $file;
         }}
     }
 }
