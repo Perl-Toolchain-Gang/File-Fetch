@@ -14,9 +14,9 @@ WriteMakefile1(
     NAME            => 'File::Fetch',
     VERSION_FROM    => 'lib/File/Fetch.pm', # finds $VERSION
     dist            => { COMPRESS => 'gzip -9f', SUFFIX => 'gz' },
-    PREREQ_PM       => { 
+    PREREQ_PM       => {
                         'IPC::Cmd'                  => 0.42, # ipc::open3 bugfix
-                        'Test::More'                => 0, 
+                        'Test::More'                => 0,
                         'File::Copy'                => 0,
                         'File::Spec'                => 0.82,
                         'File::Path'                => 0,
@@ -27,9 +27,9 @@ WriteMakefile1(
                     },
     INSTALLDIRS     => ( $] >= 5.009005 ? 'perl' : 'site' ),
     AUTHOR          => 'Jos Boumans <kane[at]cpan.org>',
-	ABSTRACT        => 'Generic file fetching code',
-    clean         => {FILES => 't/tmp'},
-);     
+    ABSTRACT        => 'Generic file fetching code',
+    clean           => {FILES => 't/tmp'},
+);
 
 sub WriteMakefile1 {  #Written by Alexandr Ciornii, version 0.21. Added by eumm-upgrade.
     my %params=@_;
