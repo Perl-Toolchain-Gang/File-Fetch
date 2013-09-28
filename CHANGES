@@ -1,3 +1,9 @@
+Changes for 0.43
+=================================================
+* Fix INSTALLDIRS to 'site' for perl 5.12+
+  (Olivier Mengué)
+  https://rt.perl.org/rt3/Public/Bug/Display.html?id=116479
+
 Changes for 0.42        Fri Apr 12 15:28:34 2013
 =================================================
 * Skip slurp tests for git://
