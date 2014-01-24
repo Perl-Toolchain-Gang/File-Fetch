@@ -1,3 +1,8 @@
+0.48        Fri Jan 24 10:32:52 2014
+
+* Force curl to be IPv4 only during testing
+  on NetBSD
+
 0.46        Tue Nov 26 22:26:42 2013
 
 * Blacklist 'lftp' on DragonflyBSD
