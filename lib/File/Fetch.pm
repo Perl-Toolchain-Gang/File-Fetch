@@ -164,6 +164,7 @@ http://www.abc.net.au/ the contents retrieved may be from a remote file called
         path            => { default => '/' },
         file            => { required => 1 },
         uri             => { required => 1 },
+        userinfo        => { default => '' },
         vol             => { default => '' }, # windows for file:// uris
         share           => { default => '' }, # windows for file:// uris
         file_default    => { default => 'file_default' },
@@ -401,7 +402,7 @@ sub _parse_uri {
     } else {
         ### using anything but qw() in hash slices may produce warnings
         ### in older perls :-(
-        @{$href}{ qw(host path) } = $uri =~ m|([^/]*)(/.*)$|s;
+        @{$href}{ qw(userinfo host path) } = $uri =~ m|(?:([^\@:]*:[^\:\@]*)@)?([^/]*)(/.*)$|s;
     }
 
     ### split the path into file + dir ###
@@ -580,7 +581,12 @@ sub _lwp_fetch {
     ### special rules apply for file:// uris ###
     $uri->scheme( $self->scheme );
     $uri->host( $self->scheme eq 'file' ? '' : $self->host );
-    $uri->userinfo("anonymous:$FROM_EMAIL") if $self->scheme ne 'file';
+
+    if ($self->userinfo) {
+        $uri->userinfo($self->userinfo);
+    } elsif ($self->scheme ne 'file') {
+        $uri->userinfo("anonymous:$FROM_EMAIL");
+    }
 
     ### set up the useragent object
     my $ua = LWP::UserAgent->new();
@@ -655,7 +661,7 @@ sub _httplite_fetch {
     ### modules required to download with lwp ###
     my $use_list = {
         'HTTP::Lite'    => '2.2',
-
+        'MIME::Base64'  => '0',
     };
 
     unless( can_load(modules => $use_list) ) {
@@ -672,6 +678,11 @@ sub _httplite_fetch {
       # Naughty naughty but there isn't any accessor/setter
       $http->{timeout} = $TIMEOUT if $TIMEOUT;
       $http->http11_mode(1);
+
+      if ($self->userinfo) {
+          my $encoded = MIME::Base64::encode($self->userinfo, '');
+          $http->add_req_header("Authorization", "Basic $encoded");
+      }
 
       my $fh = FileHandle->new;
 
