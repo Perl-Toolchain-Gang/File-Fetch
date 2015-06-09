@@ -5,7 +5,7 @@ WriteMakefile1(
     LICENSE => 'perl',
     META_MERGE => {
         resources => {
-            repository => 'https://github.com/jib/file-fetch',
+            repository => 'https://github.com/Perl-Toolchain-Gang/File-Fetch',
         },
     },
     #BUILD_REQUIRES => {
