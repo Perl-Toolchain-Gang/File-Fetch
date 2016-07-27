@@ -52,6 +52,9 @@ local $Params::Check::VERBOSE               = 1;
 local $Module::Load::Conditional::VERBOSE   = 0;
 local $Module::Load::Conditional::VERBOSE   = 0;
 
+### Fix CVE-2016-1238 ###
+local $Module::Load::Conditional::FORCE_SAFE_INC = 1;
+
 ### see what OS we are on, important for file:// uris ###
 use constant ON_WIN     => ($^O eq 'MSWin32');
 use constant ON_VMS     => ($^O eq 'VMS');
