@@ -237,6 +237,9 @@ for my $entry (@map) {
 {   my $uri = 'git://github.com/jib/file-fetch.git';
 
     for (qw[git]) {
+        local $ENV{GIT_CONFIG_NOSYSTEM} = 1;
+        local $ENV{XDG_CONFIG_HOME};
+        local $ENV{HOME};
         _fetch_uri( git => $uri, $_ );
     }
 }
