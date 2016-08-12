@@ -203,7 +203,7 @@ for my $entry (@map) {
 {   for my $uri ( 'http://www.cpan.org/index.html',
                   'http://www.cpan.org/index.html?q=1',
                   'http://www.cpan.org/index.html?q=1&y=2',
-                  'http://user:passwd@httpbin.org/basic-auth/user/passwd',
+                  #'http://user:passwd@httpbin.org/basic-auth/user/passwd',
     ) {
         for (qw[lwp httptiny wget curl lftp fetch lynx httplite iosock]) {
             _fetch_uri( http => $uri, $_ );
