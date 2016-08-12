@@ -65,10 +65,10 @@ my @map = (
         path	=> '/CPAN/',
         file	=> 'MIRRORING.FROM',
     },
-    {	uri	    => 'git://github.com/jib/file-fetch.git',
+    {	uri	    => 'git://github.com/Perl-Toolchain-Gang/file-fetch.git',
         scheme	=> 'git',
         host	=> 'github.com',
-        path	=> '/jib/',
+        path	=> '/Perl-Toolchain-Gang/',
         file	=> 'file-fetch.git',
     },
     {   uri     => 'http://localhost/tmp/index.txt',
@@ -234,7 +234,7 @@ for my $entry (@map) {
 }
 
 ### git:// tests ###
-{   my $uri = 'git://github.com/jib/file-fetch.git';
+{   my $uri = 'git://github.com/Perl-Toolchain-Gang/file-fetch.git';
 
     for (qw[git]) {
         local $ENV{GIT_CONFIG_NOSYSTEM} = 1;
