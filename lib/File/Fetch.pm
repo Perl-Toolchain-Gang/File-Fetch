@@ -677,6 +677,12 @@ sub _httplite_fetch {
         return;
     }
 
+    # HTTP::Lite explicitly only supports HTTP requests.
+    unless ( $self->scheme eq 'http' ) {
+        $METHOD_FAIL->{'httplite'} = 1;
+        return;
+    }
+
     my $uri = $self->uri;
     my $retries = 0;
 
@@ -690,6 +696,9 @@ sub _httplite_fetch {
       if ($self->userinfo) {
           my $encoded = MIME::Base64::encode($self->userinfo, '');
           $http->add_req_header("Authorization", "Basic $encoded");
+
+          # Work around a bug in HTTP::Lite URL parsing by reconstructing the URL without userinfo.
+          $uri = $self->scheme . '://' . $self->host . $self->path . $self->file;
       }
 
       my $fh = FileHandle->new;
@@ -779,7 +788,17 @@ sub _iosock_fetch {
     binmode $fh;
 
     my $path = File::Spec::Unix->catfile( $self->path, $self->file );
-    my $req = "GET $path HTTP/1.0\x0d\x0aHost: " . $self->host . "\x0d\x0a\x0d\x0a";
+
+    my $req = "GET $path HTTP/1.0\x0d\x0a";
+    $req .= "Host: " . $self->host . "\x0d\x0a";
+
+    if ($self->userinfo) {
+        my $encoded = MIME::Base64::encode($self->userinfo, '');
+        $req .= "Authorization: Basic $encoded\x0d\x0a";
+    }
+
+    $req .= "\x0d\x0a";
+
     $sock->send( $req );
 
     my $select = IO::Select->new( $sock );
@@ -1072,13 +1091,15 @@ sub _lynx_fetch {
             'lynx' ));
     }
 
+    my $auth = ($self->userinfo) ? $self->userinfo : 'anonymous:$FROM_EMAIL';
+
     ### check if the HTTP resource exists ###
     if ($self->uri =~ /^https?:\/\//i) {
         my $cmd = [
             $lynx,
             '-head',
             '-source',
-            "-auth=anonymous:$FROM_EMAIL",
+            "-auth=$auth",
         ];
 
         push @$cmd, "-connect_timeout=$TIMEOUT" if $TIMEOUT;
@@ -1108,7 +1129,7 @@ sub _lynx_fetch {
     my $cmd = [
         $lynx,
         '-source',
-        "-auth=anonymous:$FROM_EMAIL",
+        "-auth=$auth",
     ];
 
     push @$cmd, "-connect_timeout=$TIMEOUT" if $TIMEOUT;
