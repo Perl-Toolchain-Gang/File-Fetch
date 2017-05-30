@@ -6,6 +6,13 @@
 
 0.50        Mon Aug  8 12:49:13 2016
 
+* Add support for 'https' scheme (Tatsuhiko Miyagawa)
+* Add support for userinfo in URLs that can be
+  accessed via the 'userinfo' accessor
+  (Tatsuhiko Miyagawa)
+* Add support for Basic HTTP authentication
+  (Tatsuhiko Miyagawa)
+* Change module repository location
 * Require Module::Load::Conditional 0.66
 * Fix FTP tests for ipv6
 
@@ -31,11 +38,17 @@
 0.40        Fri Apr 12 11:18:52 2013
 
 * Added git:// url support
+* Use File::Path rmtree instead of unlink in the
+  tests
 
 0.38        Thu Jan 10 20:52:53 2013
 
+* Change conditionals to use 'unless' to improve
+  code readability (Kent Fredric)
 * Add support for an optional tempdir_root
   parameter (Kent Fredric)
+* Be consistent and safe with our use of
+  FileHandle for ftp and lynx
 
 0.36        Thu Jun 28 13:41:31 2012
 
@@ -62,7 +75,7 @@
 
 0.26        Sat Nov  6 23:30:59 2010
 
-* Added support for HTTP::Lite 
+* Added support for HTTP::Lite
 * Resolved issue with '-l' switch and iosock fetch
 
 0.24        Wed Jan  6 23:32:19 2010
@@ -94,9 +107,9 @@
 
 0.18        Wed Dec 17 14:00:40 2008
 
-* Address #41412: User agent string contains uninterpolated 
+* Address #41412: User agent string contains uninterpolated
   $VERSION.
-* Use IPC::Cmd 0.42's supplied QUOTE constant, rather than 
+* Use IPC::Cmd 0.42's supplied QUOTE constant, rather than
   rolling our own
 
 0.16        Fri Oct 10 13:54:40 2008
@@ -110,11 +123,11 @@
   a temporary file to store the commands for lftp, as they are
   multiline commands. Without this, we run into portability issues
   with 'special' characters on various platforms, like ; and &.
-  
+
 0.15_03     Sun Jul 13 15:56:41 2008
 
-* Add -q to curl, to inhibit the reading of .curlrc, 
-  which may interfere with the options we pass ourselves. 
+* Add -q to curl, to inhibit the reading of .curlrc,
+  which may interfere with the options we pass ourselves.
   This addresses #36902
 
 0.15_02     Sun May 18 13:42:30 2008
@@ -125,7 +138,7 @@
 
 0.15_01     Sun Apr  6 13:55:36 2008
 
-* Address: #32755: File-Fetch tests cannot fail if 
+* Address: #32755: File-Fetch tests cannot fail if
   unable to connect to internet. Tests are now skipped
   if it looks as the failure is due to a lacking network
   connection.
@@ -142,11 +155,11 @@
 
 0.13_03         2007-11-04 21:32:40
 
-* Restore OS specific file:// URI behaviour. The 
+* Restore OS specific file:// URI behaviour. The
   RFC's specify that the url definition is host OS
   specific, so what a url means on one machine will
   mean something different on another.
-  VMS is now treated according to RFC 1738 
+  VMS is now treated according to RFC 1738
   (http://www.faqs.org/rfcs/rfc1738.html).
 
 0.13_02 Sun Nov  4 10:38:40 CET 2007
@@ -157,7 +170,7 @@
 0.13_01 Sat Nov  3 18:55:10 CET 2007
 
 * Apply a modified version of dmq's patch to deal
-  properly with file:// URIs on Win32. 
+  properly with file:// URIs on Win32.
 * Add test cases for Win32 file:// URIs
 
 0.12    Mon Oct 15 14:32:23 CEST 2007
@@ -179,30 +192,30 @@
   the class of objects.
 * URI encoding is not always clear or trivial. Add
   a FAQ entry about it.
-* Add $ff->output_file as accessor, which is the 
+* Add $ff->output_file as accessor, which is the
   requested file, stripped from query parameters.
-* Errors are now stored per object rather than 
+* Errors are now stored per object rather than
   class wide.
 
 0.09_01 Wed Jan  3 17:17:31 CET 2007
 
-* address: #23864: File:Fetch does not use quotation 
+* address: #23864: File:Fetch does not use quotation
     marks while using wget:
   * the handlers for lynx, wget, curl and rsync now
     quote their URIs.
 
 0.08    Wed Jul  5 13:56:36 CEST 2006
 
-* address: #18942: unproper handling of http errors 
+* address: #18942: unproper handling of http errors
   in external handlers:
-  * the wget handler, on a failed attempt, now 
+  * the wget handler, on a failed attempt, now
     unlinks its outputfile
-  * the curl handler is updated to follow '302 moved' 
+  * the curl handler is updated to follow '302 moved'
     and such like status messages
-  * lynx use is further discouraged, as it doesn't 
-    communicate http status messages back to the caller 
+  * lynx use is further discouraged, as it doesn't
+    communicate http status messages back to the caller
     at all.
-* address #11483: File::Fetch 0.07 cannot do an FTP 
+* address #11483: File::Fetch 0.07 cannot do an FTP
   fetch on Win32. FTP fetching using Net::FTP should
   now work properly on win32.
 * update test suite so it runs safely under PERL_CORE
@@ -245,4 +258,4 @@
 
 
 * Initial release
-    
+
