@@ -28,7 +28,7 @@ $PREFER_BIN     = 0;                # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';
 $USER_AGENT     = "File::Fetch/$VERSION";
 $BLACKLIST      = [qw|ftp|];
-push @$BLACKLIST, qw|lftp| if $^O eq 'dragonfly';
+push @$BLACKLIST, qw|lftp| if $^O eq 'dragonfly' || $^O eq 'hpux';
 $METHOD_FAIL    = { };
 $FTP_PASSIVE    = 1;
 $TIMEOUT        = 0;
