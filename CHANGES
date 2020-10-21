@@ -16,6 +16,7 @@
 
 * Require Module::Load::Conditional 0.66
 * Fix FTP tests for ipv6
+* Support https with LWP, Wget and curl
 
 0.48        Fri Jan 24 10:32:52 2014
 
