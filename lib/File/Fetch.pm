@@ -52,9 +52,6 @@ local $Params::Check::VERBOSE               = 1;
 local $Module::Load::Conditional::VERBOSE   = 0;
 local $Module::Load::Conditional::VERBOSE   = 0;
 
-### Fix CVE-2016-1238 ###
-local $Module::Load::Conditional::FORCE_SAFE_INC = 1;
-
 ### see what OS we are on, important for file:// uris ###
 use constant ON_WIN     => ($^O eq 'MSWin32');
 use constant ON_VMS     => ($^O eq 'VMS');
@@ -576,8 +573,8 @@ sub _lwp_fetch {
         $use_list->{'LWP::Protocol::https'} = '0';
     }
 
-    local @INC = @INC;
-    pop @INC if $INC[-1] eq '.';
+    ### Fix CVE-2016-1238 ###
+    local $Module::Load::Conditional::FORCE_SAFE_INC = 1;
     unless( can_load( modules => $use_list ) ) {
         $METHOD_FAIL->{'lwp'} = 1;
         return;
@@ -635,8 +632,8 @@ sub _httptiny_fetch {
 
     };
 
-    local @INC = @INC;
-    pop @INC if $INC[-1] eq '.';
+    ### Fix CVE-2016-1238 ###
+    local $Module::Load::Conditional::FORCE_SAFE_INC = 1;
     unless( can_load(modules => $use_list) ) {
         $METHOD_FAIL->{'httptiny'} = 1;
         return;
@@ -676,8 +673,8 @@ sub _httplite_fetch {
         'MIME::Base64'  => '0',
     };
 
-    local @INC = @INC;
-    pop @INC if $INC[-1] eq '.';
+    ### Fix CVE-2016-1238 ###
+    local $Module::Load::Conditional::FORCE_SAFE_INC = 1;
     unless( can_load(modules => $use_list) ) {
         $METHOD_FAIL->{'httplite'} = 1;
         return;
@@ -758,8 +755,8 @@ sub _iosock_fetch {
         'IO::Select'       => '0.0',
     };
 
-    local @INC = @INC;
-    pop @INC if $INC[-1] eq '.';
+    ### Fix CVE-2016-1238 ###
+    local $Module::Load::Conditional::FORCE_SAFE_INC = 1;
     unless( can_load(modules => $use_list) ) {
         $METHOD_FAIL->{'iosock'} = 1;
         return;
@@ -843,8 +840,8 @@ sub _netftp_fetch {
     ### required modules ###
     my $use_list = { 'Net::FTP' => 0 };
 
-    local @INC = @INC;
-    pop @INC if $INC[-1] eq '.';
+    ### Fix CVE-2016-1238 ###
+    local $Module::Load::Conditional::FORCE_SAFE_INC = 1;
     unless( can_load( modules => $use_list ) ) {
         $METHOD_FAIL->{'netftp'} = 1;
         return;
