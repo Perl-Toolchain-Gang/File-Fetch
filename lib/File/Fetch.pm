@@ -400,9 +400,12 @@ sub _parse_uri {
         ### rebuild the path from the leftover parts;
         $href->{path} = join '/', '', splice( @parts, $index, $#parts );
 
-    } else {
+    } elsif ( $href->{scheme} eq 'http' || $href->{scheme} eq 'https' ) {
         ### using anything but qw() in hash slices may produce warnings
         ### in older perls :-(
+        @{$href}{ qw(userinfo host path) } = $uri =~ m|(?:([^\@:]*:[^\:\@]*)@)?([^/]*)(/.*)?$|s;
+        $href->{path} = '/' unless defined $href->{path};
+    } else {
         @{$href}{ qw(userinfo host path) } = $uri =~ m|(?:([^\@:]*:[^\:\@]*)@)?([^/]*)(/.*)$|s;
     }
 
