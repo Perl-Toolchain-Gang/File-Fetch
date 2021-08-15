@@ -77,6 +77,12 @@ my @map = (
         path    => '/tmp/',
         file    => 'index.txt',
     },
+    {   uri     => 'http://localhost',   # non-canonical URI
+        scheme  => 'http',
+        host    => 'localhost',
+        path    => '/',                  # default path is '/'
+        file    => '',
+    },
 
     ### only test host part, the rest is OS dependant
     {   uri     => 'file://localhost/tmp/index.txt',
@@ -200,7 +206,8 @@ for my $entry (@map) {
 }
 
 ### http:// tests ###
-{   for my $uri ( 'http://httpbin.org/html',
+{   for my $uri ( 'http://httpbin.org',
+                  'http://httpbin.org/html',
                   'http://httpbin.org/response-headers?q=1',
                   'http://httpbin.org/response-headers?q=1&y=2',
                   #'http://www.cpan.org/index.html?q=1&y=2',
@@ -300,11 +307,3 @@ sub _fetch_uri {
         }}
     }
 }
-
-
-
-
-
-
-
-
