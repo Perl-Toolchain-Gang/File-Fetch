@@ -491,7 +491,9 @@ sub fetch {
         next if grep { lc $_ eq $method } @$BLACKLIST;
 
         ### method is known to fail ###
-        next if $METHOD_FAIL->{$method};
+        next if ref $METHOD_FAIL->{$method}
+            ? $METHOD_FAIL->{$method}{$self->scheme}
+            : $METHOD_FAIL->{$method};
 
         ### there's serious issues with IPC::Run and quoting of command
         ### line arguments. using quotes in the wrong place breaks things,
@@ -569,15 +571,22 @@ sub _lwp_fetch {
 
     };
 
-    if ($self->scheme eq 'https') {
-        $use_list->{'LWP::Protocol::https'} = '0';
-    }
-
     ### Fix CVE-2016-1238 ###
     local $Module::Load::Conditional::FORCE_SAFE_INC = 1;
     unless( can_load( modules => $use_list ) ) {
         $METHOD_FAIL->{'lwp'} = 1;
         return;
+    }
+
+    if ($self->scheme eq 'https') {
+        my $https_use_list = {
+            'LWP::Protocol::https' => '0.0',
+        };
+
+        unless ( can_load(modules => $https_use_list) ) {
+            $METHOD_FAIL->{'lwp'} = { 'https' => 1 };
+            return;
+        }
     }
 
     ### setup the uri object
