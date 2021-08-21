@@ -39,7 +39,7 @@ $FORCEIPV4      = 0;
 ### methods available to fetch the file depending on the scheme
 $METHODS = {
     http    => [ qw|lwp httptiny wget curl lftp fetch httplite lynx iosock| ],
-    https   => [ qw|lwp wget curl| ],
+    https   => [ qw|lwp httptiny wget curl| ],
     ftp     => [ qw|lwp netftp wget curl lftp fetch ncftp ftp| ],
     file    => [ qw|lwp lftp file| ],
     rsync   => [ qw|rsync| ],
@@ -635,6 +635,10 @@ sub _httptiny_fetch {
     ### Fix CVE-2016-1238 ###
     local $Module::Load::Conditional::FORCE_SAFE_INC = 1;
     unless( can_load(modules => $use_list) ) {
+        $METHOD_FAIL->{'httptiny'} = 1;
+        return;
+    }
+    if ( $self->scheme eq 'https' && !HTTP::Tiny->can_ssl ) {
         $METHOD_FAIL->{'httptiny'} = 1;
         return;
     }
