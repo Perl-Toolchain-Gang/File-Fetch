@@ -906,7 +906,7 @@ sub _wget_fetch {
     push(@$cmd, '--timeout=' . $TIMEOUT) if $TIMEOUT;
 
     ### run passive if specified ###
-    push @$cmd, '--passive-ftp' if $FTP_PASSIVE;
+    push @$cmd, '--passive-ftp' if $self->scheme eq 'ftp' && $FTP_PASSIVE;
 
     ### set the output document, add the uri ###
     push @$cmd, '--output-document', $to, $self->uri;
