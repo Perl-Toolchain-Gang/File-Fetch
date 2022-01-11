@@ -161,7 +161,7 @@
   specific, so what a url means on one machine will
   mean something different on another.
   VMS is now treated according to RFC 1738 
-  (http://www.faqs.org/rfcs/rfc1738.html).
+  (https://datatracker.ietf.org/doc/html/rfc1738).
 
 0.13_02 Sun Nov  4 10:38:40 CET 2007
 

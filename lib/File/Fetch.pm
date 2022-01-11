@@ -359,7 +359,7 @@ sub _parse_uri {
     $href->{scheme} = $1;
 
     ### See rfc 1738 section 3.10
-    ### http://www.faqs.org/rfcs/rfc1738.html
+    ### https://datatracker.ietf.org/doc/html/rfc1738#section-3.10
     ### And wikipedia for more on windows file:// urls
     ### http://en.wikipedia.org/wiki/File://
     if( $href->{scheme} eq 'file' ) {
@@ -1315,7 +1315,7 @@ sub _fetch_fetch {
 
 ### use File::Copy for fetching file:// urls ###
 ###
-### See section 3.10 of RFC 1738 (http://www.faqs.org/rfcs/rfc1738.html)
+### See section 3.10 of RFC 1738 (https://datatracker.ietf.org/doc/html/rfc1738#section-3.10)
 ### Also see wikipedia on file:// (http://en.wikipedia.org/wiki/File://)
 ###
 
@@ -1698,7 +1698,7 @@ the C<URI::Escape> module from CPAN, and pre-encode your URI before
 passing it to C<File::Fetch>. You can read about the details of URIs
 and URI encoding here:
 
-  http://www.faqs.org/rfcs/rfc2396.html
+L<https://datatracker.ietf.org/doc/html/rfc2396>
 
 =head1 TODO
 
