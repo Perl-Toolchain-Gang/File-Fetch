@@ -1,3 +1,10 @@
+1.04        Tue Jan 18 20:46:04 2022
+
+* Resolve test warnings reported in GitHub issue #22
+  relating to Github's deprecation and removal of git:// protocol
+
+* Pointed various RFC links in docs to ietf.org
+
 1.02        Fri Jan  7 14:44:34 2022
 
 * wget: use --passive-ftp switch only for ftp scheme
