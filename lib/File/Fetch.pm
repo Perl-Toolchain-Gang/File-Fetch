@@ -23,7 +23,7 @@ use vars    qw[ $VERBOSE $PREFER_BIN $FROM_EMAIL $USER_AGENT
                 $FTP_PASSIVE $TIMEOUT $DEBUG $WARN $FORCEIPV4
             ];
 
-$VERSION        = '1.04';
+$VERSION        = '1.06';
 $VERSION        = eval $VERSION;    # avoid warnings with development releases
 $PREFER_BIN     = 0;                # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';
@@ -978,6 +978,9 @@ sub _lftp_fetch {
 
     ### if a timeout is set, add it ###
     $str .= "set net:timeout $TIMEOUT;\n" if $TIMEOUT;
+
+    ### lftp can get stuck in a loop of retries without this
+    $str .= "set net:reconnect-interval-base 5;\nset net:max-retries 2;\n";
 
     ### run passive if specified ###
     $str .= "set ftp:passive-mode 1;\n" if $FTP_PASSIVE;

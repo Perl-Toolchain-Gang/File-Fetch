@@ -19,6 +19,8 @@ $IPC::Cmd::DEBUG    = $IPC::Cmd::DEBUG      = 1 if $ARGV[0];
 
 $File::Fetch::FORCEIPV4 = $File::Fetch::FORCEIPV4 = 1;
 
+$File::Fetch::TIMOUT = $File::Fetch::TIMEOUT = 30;
+
 unless( $ENV{PERL_CORE} ) {
     warn qq[
 
